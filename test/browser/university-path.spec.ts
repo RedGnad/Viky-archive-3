@@ -16,6 +16,14 @@ import { DAY, gift, json, makeAnAccount, neverAskedToBeTold, now, profile, shot 
 const SHOTS = process.env.VIKY_PATH_CAPTURES;
 const SIZES = sizesFor(SHOTS);
 const shot = (page: Page, size: string, name: string) => capture(SHOTS, page, size, name);
+/** The same picture by day and after dark: the path is drawn in the tokens of each. */
+async function shotDayAndNight(page: Page, size: string, name: string) {
+  await shot(page, size, name);
+  if (!SHOTS) return;
+  await page.emulateMedia({ colorScheme: "dark" });
+  await shot(page, size, `${name}-after-dark`);
+  await page.emulateMedia({ colorScheme: "light" });
+}
 
 const GIFT = "1999987";
 const LAST_DAY_MS = (now() + 50 * DAY) * 1000;
@@ -98,7 +106,7 @@ test.describe("a university gift draws its path", () => {
       await expect(page.getByText(/^You are the first from it here, so this happens once\. Then you show your page, any day until \d{1,2} [A-Z][a-z]{2}\.$/)).toBeVisible();
       await expect(page.getByRole("button", { name: "Show it", exact: true })).toHaveCount(0);
       await expect(page.getByText(/within (an|the) hour/)).toHaveCount(0);
-      await shot(page, size.name, "1-student-being-set-up");
+      await shotDayAndNight(page, size.name, "1-student-being-set-up");
       // What there is to be told while it is set up: the day it is ready.
       await page.locator('[data-decide="messages"]').click();
       const messages = page.getByRole("dialog", { name: "Notifications" });
@@ -126,14 +134,14 @@ test.describe("a university gift draws its path", () => {
       await expect(page.getByText("Shown. Viky is checking it.", { exact: true }).first()).toBeVisible();
       await expect(page.getByText("You are the first from your university here: a person at Viky reads this one.", { exact: true })).toBeVisible();
       await expect(page.getByRole("button", { name: "Show it", exact: true })).toHaveCount(0);
-      await shot(page, size.name, "3-student-being-checked");
+      await shotDayAndNight(page, size.name, "3-student-being-checked");
 
       // 4. Theirs: every stop passed, the character over the last, and the two small stops still on the path.
       state = THEIRS;
       await page.goto(`/g/${GIFT}`);
       await expectPath(main, ["Set up: done", "Shown: done", "Checked: done", "Yours: now"]);
       await expect(seatOf(main)).toHaveCSS("grid-column-start", "4");
-      await shot(page, size.name, "4-student-yours");
+      await shotDayAndNight(page, size.name, "4-student-yours");
       await device.context.close();
     });
 
@@ -193,7 +201,7 @@ test.describe("a university gift draws its path", () => {
       const card = page.locator(`a[href="/g/${GIFT}"]`);
       await expectPath(card, ["Set up: now", "Shown: toCome", "Checked (once, 1 day): toCome", "Theirs: toCome"]);
       await expect(seatOf(card)).toHaveCSS("grid-column-start", "1");
-      await shot(page, size.name, "9b-payer-card-in-gifts");
+      await shotDayAndNight(page, size.name, "9b-payer-card-in-gifts");
       await device.context.close();
     });
 
@@ -367,7 +375,7 @@ test.describe("a university gift draws its path", () => {
       await expectPath(chosen, ["Set up (once, 2 days): toCome", "Shown: toCome", "Checked (once, 1 day): toCome", "Theirs: toCome"]);
       await expect(seatOf(chosen)).toHaveCount(0);
       await expect(chosen.locator("[data-university-when]")).toHaveText("First gift at this university: the next ones skip the two small stops. The money waits in their name meanwhile.");
-      await shot(page, size.name, "15-chooser-first-gift");
+      await shotDayAndNight(page, size.name, "15-chooser-first-gift");
 
       // The same university for a year passed: Results first, no setting up drawn.
       await modes.getByText("The year passed", { exact: true }).click();
@@ -416,7 +424,7 @@ test.describe("a university gift draws its path", () => {
       await expect(page.getByText(/within (an|the) hour/)).toHaveCount(0);
       await block.scrollIntoViewIfNeeded();
       await page.evaluate(`document.querySelector('[data-minute="universities"]').scrollIntoView({ block: "center" })`);
-      await shot(page, size.name, "13-judges-universities");
+      await shotDayAndNight(page, size.name, "13-judges-universities");
       await device.context.close();
     });
   }
