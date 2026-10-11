@@ -136,8 +136,8 @@ test("under the university chosen, the gift's path and one line; on the list, ev
   // it is our own delay, and the path says it on the stop it belongs to, "once, 2 days" (src/university-path.ts).
   assert.equal(UNIVERSITY_CHOICE.firstGift, "First gift at this university: the next ones skip the two small stops. The money waits in their name meanwhile.");
   assert.equal(UNIVERSITY_CHOICE.waitsMeanwhile, "The money waits in their name meanwhile.");
-  // Under a university set up whose first proof is still to be read: the first proof, never "the first gift" (11 Oct 2026).
-  assert.equal(UNIVERSITY_CHOICE.firstProof, "First proof from this university: the next ones skip the small stop.");
+  // Under a university set up whose first proof is still to be read: its first student, never "the first gift" (11 Oct 2026).
+  assert.equal(UNIVERSITY_CHOICE.firstProof, "First student from this university: the next ones skip the small stop. The money waits in their name meanwhile.");
   assert.match(UNIVERSITY_CHOICE.firstGift, /^First gift at this university: /);
   assert.equal(UNIVERSITY_CHOICE.readyInTwoDays, "Ready in 2 days");
   const chooser = readFileSync("app/kit/offer/UniversityChooser.tsx", "utf8");
@@ -203,9 +203,7 @@ test("the chooser lists names alone, says nothing about checking, and a search t
   assert.deepEqual(Object.keys(UNIVERSITY_CHOICE).sort(), ["askForIt", "change", "country", "everywhere", "firstGift", "firstProof", "inCountry", "list", "nothing", "path", "reading", "ready", "readyInTwoDays", "search", "unreadable", "waitsMeanwhile"]);
   // The mark's words, as the founder drew them on the mockup of 10 Oct 2026.
   assert.equal(UNIVERSITY_CHOICE.ready, "Ready today");
-  // One sentence names the proof since 11 Oct 2026, in the founder's words, under a university whose first proof is
-  // still to be read: the path over it draws that check as a stop. No other word of the chooser speaks of checking.
-  assert.doesNotMatch(JSON.stringify([...Object.entries(UNIVERSITY_CHOICE).filter(([key, v]) => key !== "firstProof" && typeof v === "string").map(([, v]) => v), UNIVERSITY_CHOICE.search("1")]), /unverified|password|proof|checked|connected|tested/i);
+  assert.doesNotMatch(JSON.stringify([...Object.values(UNIVERSITY_CHOICE).filter((v) => typeof v === "string"), UNIVERSITY_CHOICE.search("1")]), /unverified|password|proof|checked|connected|tested/i);
   // Under a search that found nothing, and nowhere else (the founder, 10 Oct 2026): the sentence that says so, and
   // a small button to the page a university is asked from. It stood at the foot of every list as "Yours isn't here?
   // Add your university", which a payer read as theirs to do.

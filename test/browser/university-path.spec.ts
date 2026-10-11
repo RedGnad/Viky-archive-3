@@ -393,7 +393,7 @@ test.describe("a university gift draws its path", () => {
       // Set up, its first proof still to be read: three stops.
       await lines.filter({ hasText: "Abomey-Calavi" }).click();
       await expectPath(chosen, ["Shown: toCome", "Checked (once, 1 day): toCome", "Theirs: toCome"]);
-      await expect(chosen.locator("[data-university-when]")).toHaveText("First proof from this university: the next ones skip the small stop.");
+      await expect(chosen.locator("[data-university-when]")).toHaveText("First student from this university: the next ones skip the small stop. The money waits in their name meanwhile.");
       await shot(page, size.name, "18-chooser-first-proof");
       await chosen.getByRole("button", { name: /Change/ }).click();
 
