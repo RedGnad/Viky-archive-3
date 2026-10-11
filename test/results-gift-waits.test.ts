@@ -19,7 +19,7 @@ test("only the two results conditions wait, and the words are the mockup's", () 
   assert.deepEqual(["university-enrollment-shown", "toefl-mybest-shown", "duolingo-daily", "marathon-finish", "nothing"].map(waitsForResults), [false, false, false, false, false]);
   assert.equal(GIFT_LIVE.awaitingProof.resultsYours, "Waiting for your results.");
   assert.equal(GIFT_LIVE.awaitingProof.resultsTheirs, "Waiting for their results.");
-  assert.equal(GIFT_LIVE.awaitingProof.resultsNextYours, "This gift is for the year under way. Your university publishes its results at the end of the year: show them here that day.");
+  assert.equal(GIFT_LIVE.awaitingProof.resultsNextYours, "This gift is for the year under way. Show them here the day your university publishes them.");
   assert.equal(SHOW_PROOF.resultsOut, "My results are out");
   assert.equal(SHOW_PROOF.notYet, "Not yet");
 });
