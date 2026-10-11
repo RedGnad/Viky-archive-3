@@ -1704,6 +1704,24 @@ dialog.sheet[open] {
   margin-top: 16px;
 }
 
+/* The judges page: the path of a first gift beside the path of every gift after, one under the other on a phone. */
+.judges-paths {
+  display: grid;
+  gap: 22px 26px;
+  margin: 14px 0 16px;
+}
+
+.judges-paths .university-path {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+@media (min-width: 760px) {
+  .judges-paths {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .university-path-seat {
   grid-row: 1;
   display: flex;

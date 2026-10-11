@@ -437,6 +437,8 @@ function LiveGift({ status, linkKey, reload, refresh, openProof, cameBackShown, 
    */
   const hadOrNot = milestone?.shape === "certificate" ? milestone : null;
   const lateUntilMs = hadOrNot && hadOrNot.deadlineMs !== null ? hadOrNot.deadlineMs + MILESTONE_LATE_PROOF_SECONDS * 1000 : null;
+  // A university whose first proof a person still has to read: the stop is on the gift's path, and the words follow it.
+  const firstAtItsUniversity = milestone?.university ? milestone.university.provider === "none" || milestone.university.provider === "unpinned" : false;
   // The day the university's page is read by at the latest: two days after the gift was made, in the reader's clock.
   // Once that day has passed, no day is said: the stop keeps its place and the day goes (the founder, 10 Oct 2026).
   const builtBy = nowMs !== 0 && onALaterDay(nowMs, (status.createdAtChain + 2 * 86_400) * 1000, zone) ? null : dayInWords((status.createdAtChain + 2 * 86_400) * 1000, zone);
@@ -513,8 +515,7 @@ function LiveGift({ status, linkKey, reload, refresh, openProof, cameBackShown, 
     takeableFromHome: earned > 0n,
     proof: proofStands,
     builtByInWords: builtBy,
-    // A university whose first proof a person still has to read: the stop is on the gift's path, and the words follow it.
-    firstAtItsUniversity: milestone?.university ? milestone.university.provider === "none" || milestone.university.provider === "unpinned" : false,
+    firstAtItsUniversity,
     lastDayInWords: hadOrNot && hadOrNot.deadlineMs !== null ? dayInWords(hadOrNot.deadlineMs, zone) : null,
     backOnInWords: lateUntilMs !== null ? dayInWords(lateUntilMs, zone) : null,
     lateUntilInWords: lateUntilMs === null ? null : dateInWords(lateUntilMs, zone),
@@ -847,7 +848,7 @@ function LiveGift({ status, linkKey, reload, refresh, openProof, cameBackShown, 
         }
         return showsProof ? (
           <>
-            <ShowProof giftId={giftId} conditionId={milestone.conditionId} yours={mine} review={proofReview} reviewMessage={milestone.review?.message ?? null} limitReached={emptyReserve === "proofs"} openAtLoad={openProof} onChecking={setProofSilent} onShown={reloadAll} />
+            <ShowProof giftId={giftId} conditionId={milestone.conditionId} yours={mine} review={proofReview} reviewMessage={milestone.review?.message ?? null} firstTime={firstAtItsUniversity} limitReached={emptyReserve === "proofs"} openAtLoad={openProof} onChecking={setProofSilent} onShown={reloadAll} />
             {resultsGift && mine && !checkingTheirOwn && !proofReview ? (
               <button type="button" onClick={() => setResultsOut(false)} className={`${SMALL_BUTTON} self-start`} data-results-not-yet="">
                 {SHOW_PROOF.notYet}
@@ -1028,13 +1029,16 @@ function LiveGift({ status, linkKey, reload, refresh, openProof, cameBackShown, 
     ? null
     : daily
       ? { kind: "morning" }
-      : milestone?.review?.status === "pending"
-        ? { kind: "review" }
-        : hadOrNot
-          ? { kind: "hadOrNot" }
-          : milestone && (readsLive || unopenedForItsFunder)
-            ? { kind: "reach", target: String(milestone.targetWords ?? milestone.target) }
-            : null;
+      : // A university being set up, where the gift's path draws that stop: its people wait on the day it is ready.
+        milestone?.review?.status === "building" && !resultsGift
+        ? { kind: "setUp" }
+        : milestone?.review?.status === "pending"
+          ? { kind: "review" }
+          : hadOrNot
+            ? { kind: "hadOrNot" }
+            : milestone && (readsLive || unopenedForItsFunder)
+              ? { kind: "reach", target: String(milestone.targetWords ?? milestone.target) }
+              : null;
   // The funder's page as the funder reads it now, for the sheet that says what they see: the same moment in their
   // voice, and the days up to today, drawn small. A climb and a gift had or not are their state and their figure.
   const theirs = liveOf({ ...liveInput, voice: "funder" });

@@ -41,6 +41,16 @@ test("the show-it block says what Viky keeps, by condition, and never a score it
   assert.match(readFileSync("app/kit/ShowProof.tsx", "utf8"), /W\.kept\[conditionId\] \?\? \(verdictOnly\(conditionId\) \? W\.keptVerdict : W\.keptNumber\)/);
 });
 
+test("before the press, a gift that is the first at its university says the wait is longer", () => {
+  assert.equal(SHOW_PROOF.firstTime, "The first time at a university, it takes a few minutes.");
+  // In the open, above the button, and never folded: it is what the person needs to know before they press.
+  assert.match(readFileSync("app/kit/ShowProof.tsx", "utf8"), /\{firstTime \? <p className=\{HELP\} data-first-time="">\{W\.firstTime\}<\/p> : null\}\n\s+\{state\.at === "waiting" \? \(/);
+  const page = readFileSync("app/components/GiftPage.tsx", "utf8");
+  // First there: the university has no provider, or one whose first proof a person still has to read.
+  assert.match(page, /const firstAtItsUniversity = milestone\?\.university \? milestone\.university\.provider === "none" \|\| milestone\.university\.provider === "unpinned" : false;/);
+  assert.match(page, /<ShowProof [^\n]+ firstTime=\{firstAtItsUniversity\} /);
+});
+
 test("the two people are told how the review was decided, on the devices that asked", () => {
   const names = { recipientName: "Boo", funderName: "Mom" };
   assert.equal(morningSentence("recipient", { kind: "reviewed", verdict: "refused", amount: "" }, names), "Your page was checked: it does not show what this gift is for. Open the gift to see why.");

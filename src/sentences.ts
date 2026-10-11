@@ -1250,6 +1250,13 @@ export const GIFT_LIVE = {
     /** Beside a first proof held for review (the founder, 29 Sep 2026): the answer is what the person is waiting for. */
     reviewAlert: "Get a message when it is checked.",
     reviewAlertOn: "Viky will tell you when it is checked.",
+    /**
+     * Beside a university being set up (the founder's mockup of 11 Oct 2026): until then nothing told the student, who
+     * read a date and had to come back. True of `pnpm provider:add`, which tells the gift's people the moment the
+     * university is registered (src/set-up-told.ts).
+     */
+    setUpAlert: "Get a message when it is ready.",
+    setUpAlertOn: "Viky will tell you when it is ready.",
     alertInstall: "Add Viky to your Home Screen first, then open this page from there.",
   },
   /** Something granted once, waiting for the proof that it was. */
@@ -1775,6 +1782,8 @@ export const MORNING = {
     /** A proof nobody reviewed before the contract stopped taking it (the audit of 8 Oct 2026): sent as the gift goes back. */
     reviewUnreadTo: (amount: string, funder: string) => `Viky did not check your proof in time. ${opening(amount)} went back to ${funder}.`,
     reviewUnread: (amount: string) => `Viky did not check your proof in time. ${opening(amount)} went back.`,
+    /** The university a gift was waiting on is set up (the founder, 11 Oct 2026): the next step is the student's. */
+    setUp: "Your university is ready. Open your gift to show your page.",
   },
   funder: {
     /** "Léa did yesterday's lesson.": the second half is the register's, so no sentence here names a source. */
@@ -1793,6 +1802,8 @@ export const MORNING = {
     reviewNotYet: "The page shown was checked and it works. The result is not there yet.",
     reviewUnreadNamed: (name: string, amount: string) => `Viky did not check ${name}'s proof in time. ${opening(amount)} came back to you.`,
     reviewUnread: (amount: string) => `Viky did not check their proof in time. ${opening(amount)} came back to you.`,
+    setUpNamed: (name: string) => `${name}'s university is ready. They can show their page now.`,
+    setUp: "Their university is ready. They can show their page now.",
   },
 } as const;
 
@@ -1920,6 +1931,11 @@ export const SHOW_PROOF = {
   } as Readonly<Record<string, string>>,
   keptVerdict: "Viky keeps only whether it reaches what this gift is for.",
   keptNumber: "Viky keeps what it proves and nothing else.",
+  /**
+   * In the open, above the press, on a gift that is the first at its university (the founder's mockup of 11 Oct 2026):
+   * the rule that reads its page is written while the person waits, which a university read before does not need.
+   */
+  firstTime: "The first time at a university, it takes a few minutes.",
   button: "Show it",
   /**
    * On a gift that waits for a year's results (the founder, 10 Oct 2026): the wait's one press, in the secondary look,

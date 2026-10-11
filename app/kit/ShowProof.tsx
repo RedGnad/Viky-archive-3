@@ -58,11 +58,12 @@ export function ShowProof({
   yours,
   review = null,
   reviewMessage = null,
+  firstTime = false,
   limitReached = false,
   openAtLoad = null,
   onChecking,
   onShown,
-}: Readonly<{ giftId: string; conditionId: string; yours: boolean; /** A first proof under review, or refused by it (D312). */ review?: "building" | "pending" | "refused" | null; /** A refusal in its own words, where it has them. */ reviewMessage?: string | null; /** The month's limit of proofs is reached: said before the person starts (the founder, 3 Oct 2026). */ limitReached?: boolean; /** The session open for this gift when the page was read on the server, or nothing. */ openAtLoad?: OpenShown | null; /** Told whether the proof is being asked about or was just answered: the block draws nothing then, and the card says it. */ onChecking?: (checking: boolean) => void; onShown: () => Promise<void> | void }>) {
+}: Readonly<{ giftId: string; conditionId: string; yours: boolean; /** A first proof under review, or refused by it (D312). */ review?: "building" | "pending" | "refused" | null; /** A refusal in its own words, where it has them. */ reviewMessage?: string | null; /** The gift is the first at its university: said before the press, since the wait is longer. */ firstTime?: boolean; /** The month's limit of proofs is reached: said before the person starts (the founder, 3 Oct 2026). */ limitReached?: boolean; /** The session open for this gift when the page was read on the server, or nothing. */ openAtLoad?: OpenShown | null; /** Told whether the proof is being asked about or was just answered: the block draws nothing then, and the card says it. */ onChecking?: (checking: boolean) => void; onShown: () => Promise<void> | void }>) {
   const condition = conditionById(conditionId);
   // A session open when the page was read is "checking" from the first image: the person is back from the
   // verification page, and the button to start over is never drawn for the moment the browser takes to ask.
@@ -239,6 +240,7 @@ export function ShowProof({
       <p className="font-medium">{W.title(condition.source)}</p>
       {/* One sentence in the open, what opens; where the person signs in and what Viky keeps are folded (rule 4). */}
       <Said className={HELP} text={`${W.whatHappens(condition.source)} ${W.kept[conditionId] ?? (verdictOnly(conditionId) ? W.keptVerdict : W.keptNumber)}`} />
+      {firstTime ? <p className={HELP} data-first-time="">{W.firstTime}</p> : null}
       {state.at === "waiting" ? (
         <>
           <a href={state.requestUrl} target="_blank" rel="noopener" className={`${PRIMARY_BUTTON} block text-center no-underline`}>
