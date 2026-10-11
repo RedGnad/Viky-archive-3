@@ -1869,12 +1869,22 @@ export const UNIVERSITY_CHOICE = {
   /** Beside the university chosen, which folds the list away so what comes after it is in reach. */
   change: "Change",
   /**
-   * Under the university chosen, in one line about that university: the only place the two days are said to a payer.
-   * True of the code: a gift on a university Viky does not read yet is made and paid like any other, the contract
-   * holds the money in the recipient's name, and its provider is built within two days of that first gift.
+   * At the end of the line of every other university, for a gift on enrolment (the founder's mockup of 11 Oct 2026):
+   * in the country's own small type, with no pill, so no line reads as closed. True of the code: a gift on a
+   * university Viky does not read yet is made and paid like any other, and its provider is built within two days of
+   * that first gift. A gift on results says no time on any line: it waits for the year's results whatever the university.
    */
-  setUpInTwoDays: "They can show their page two days after you pay, at the latest. The money waits in their name meanwhile.",
-  showToday: "Its students show their page today.",
+  readyInTwoDays: "Ready in 2 days",
+  /** What the drawing under the university chosen is, to a reader who does not see it (app/kit/UniversityPath.tsx). */
+  path: "How this gift goes, stop by stop",
+  /**
+   * Under that drawing, one line (the same mockup). The two small stops are ours and happen once: said where a first
+   * gift has both, and where the university's page is read already and only its first proof is still to be checked.
+   * The contract holds the money in the recipient's name from the payment on, which is what "waits" says.
+   */
+  firstGift: "First gift at this university: the next ones skip the two small stops. The money waits in their name meanwhile.",
+  firstProof: "First gift at this university: the next ones skip the small stop. The money waits in their name meanwhile.",
+  waitsMeanwhile: "The money waits in their name meanwhile.",
   /** Under a search that found nothing, and nowhere else: the way to the page where a university is asked for. */
   askForIt: "Ask for it",
 } as const;
