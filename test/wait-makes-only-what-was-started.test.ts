@@ -71,6 +71,13 @@ test("the screen holds to it where it looks and where it signs, and a look whose
   // One creation at a time, and none from a look that began on a screen that has since changed.
   assert.match(pay, /const make = async \(\) => \{\n(\s*\/\/[^\n]*\n)+\s+if \(!live \|\| working\.current\) return;\n\s+working\.current = true;/);
   assert.match(pay, /const read = await refresh\(\);\n(\s*\/\/[^\n]*\n)+\s+if \(!read \|\| !live\) return;/);
+  // Whatever rewrites the card on the wait writes the payment with it, the card and then its way in: "Make it" after a
+  // payment that fell short, and a judge credit under the gift. The third leaves the wait for the card on Home.
+  const rewrites = [...pay.matchAll(/writeCardDraft\(/g)].length;
+  assert.equal(rewrites, 3, "three places on this screen rewrite the card");
+  assert.equal([...pay.matchAll(/writeCardDraft\(next, address\);\n\s+keepOnDevice\(next\);/g)].length, 2);
+  assert.match(pay, /onMakeIt=\{\(dollars\) => \{\n(\s*\/\/[^\n]*\n)+\s+const next = \{ \.\.\.draft, dollars, typedAmount: dollars, typedIn: "USD" \};\n\s+writeCardDraft\(next, address\);\n\s+keepOnDevice\(next\);/);
+  assert.match(pay, /writeCardDraft\(\{ \.\.\.draft, standing: undefined, standingReadAt: undefined \}, address\);\n\s+setPhase\("waiting"\);\n\s+router\.push\("\/"\);/);
   // The pay press is where a payment is started: the terms, the account, the way in, before the wait is opened.
   const sheet = readFileSync("app/kit/offer/PaySheet.tsx", "utf8");
   assert.ok(sheet.indexOf("savePendingGift({ ...draftToTerms(said, account), wayIn: way.name });") > 0);

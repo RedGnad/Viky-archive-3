@@ -114,7 +114,7 @@ test("the screens that make a gift are walked on a build that names a contract, 
   // Every spec that walks a creation is named in the job, and no spec stops by itself for that reason any more.
   const specs = readdirSync("test/browser").filter((file) => file.endsWith(".spec.ts"));
   const walking = specs.filter((file) => /needsAContract\(/.test(readFileSync(`test/browser/${file}`, "utf8"))).map((file) => file.replace(".spec.ts", "")).sort();
-  assert.deepEqual(walking, ["card-kept-on-the-way-out", "card-payment-wait", "page-closed-while-making"]);
+  assert.deepEqual(walking, ["card-kept-on-the-way-out", "card-payment-wait", "judge-credit-on-the-wait", "page-closed-while-making"]);
   assert.match(making, new RegExp(`run: pnpm test:browser ${walking.join(" ")}\\n`));
   for (const file of specs) assert.doesNotMatch(readFileSync(`test/browser/${file}`, "utf8"), /test\.skip\([^\n]*names no gift contract/, file);
 });

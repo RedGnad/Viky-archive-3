@@ -266,7 +266,7 @@ jobs:
         env:
           SESSION_SIGNING_SECRET: ci-only-session-secret-that-protects-nothing
           VIKY_BUILD_NAMES_A_CONTRACT: "1"
-        run: pnpm test:browser card-kept-on-the-way-out card-payment-wait page-closed-while-making
+        run: pnpm test:browser card-kept-on-the-way-out card-payment-wait judge-credit-on-the-wait page-closed-while-making
 
   validated:
     name: Mark the tree as walked

@@ -899,7 +899,14 @@ export function PayGift() {
             needed={units}
             held={balance}
             onCredited={() => void refresh()}
-            onMakeIt={(dollars) => writeCardDraft({ ...draft, dollars, typedAmount: dollars, typedIn: "USD" }, address)}
+            onMakeIt={(dollars) => {
+              // A credit under the gift brings the gift to the credit (D300), on the card as here, and the payment
+              // stays the one this device started: written as "Make it" writes it, the card and then its way in.
+              // The card alone left no payment started, and the wait makes only a gift whose payment was (11 Oct 2026).
+              const next = { ...draft, dollars, typedAmount: dollars, typedIn: "USD" };
+              writeCardDraft(next, address);
+              keepOnDevice(next);
+            }}
           />
         </section>
         {problem ? <FieldRefusal id="waiting-refused">{problem}</FieldRefusal> : null}
