@@ -884,6 +884,8 @@ function LiveGift({ status, linkKey, reload, refresh, openProof, cameBackShown, 
         <UniversityPath
           provider={milestone.university.provider}
           results={milestone.university.results}
+          waitedOnSetUp={milestone.university.waitedOnSetUp}
+          readByAPerson={milestone.university.readByAPerson}
           yours={voice === "recipient"}
           label={UNIVERSITY_CHOICE.path}
           setUpBy={builtBy}

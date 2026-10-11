@@ -1704,8 +1704,18 @@ dialog.sheet[open] {
   margin-top: 16px;
 }
 
-/* The judges page: the path of a first gift beside the path of every gift after, one under the other on a phone. */
+/* On a card of the list a sentence follows the path at once, where the gift's own page gives its drawing air. */
+:not(.gift-shape) > .university-path:not(.university-path-flat) {
+  margin-bottom: 10px;
+}
+
+/*
+ * The judges page: the path of a first gift beside the path of every gift after, one under the other on a phone. They
+ * stand on the ground and not on a card, so a stop is filled with the ground and joined by the ground's own hairline.
+ */
 .judges-paths {
+  --path-ground: var(--background);
+  --path-rule: var(--divider);
   display: grid;
   gap: 22px 26px;
   margin: 14px 0 16px;
@@ -1716,9 +1726,14 @@ dialog.sheet[open] {
   margin-bottom: 10px;
 }
 
+/*
+ * Side by side they take the page's whole measure, under the row's name: half of it is the width a card gives four
+ * stops on a phone. Inside the row's own column a stop had 63px, and "Shown" touched "Checked".
+ */
 @media (min-width: 760px) {
   .judges-paths {
     grid-template-columns: 1fr 1fr;
+    margin-left: calc(-10rem - var(--space-md));
   }
 }
 
@@ -1766,7 +1781,7 @@ dialog.sheet[open] {
   height: 12px;
   border: 2px solid var(--waiting-edge);
   border-radius: 50%;
-  background: var(--paper);
+  background: var(--path-ground, var(--paper));
 }
 
 .university-stop::before,
@@ -1775,7 +1790,7 @@ dialog.sheet[open] {
   position: absolute;
   top: 11px;
   height: 2px;
-  background: var(--surface-rule);
+  background: var(--path-rule, var(--surface-rule));
 }
 
 .university-stop::before {
@@ -1823,15 +1838,23 @@ dialog.sheet[open] {
   border-width: 2px;
 }
 
-.university-stop[data-lead]::after,
+/*
+ * The dashed way out of the first small stop is drawn in two halves, one from each stop. Both count their dashes from
+ * the place they meet, a gap on one side and a dash on the other, so the dashes stay even across it whatever the
+ * column's width: counted from their own ends, the two halves met on a dash twice as long.
+ */
+.university-stop[data-lead]::after {
+  background: repeating-linear-gradient(270deg, transparent 0 4px, var(--path-dash, var(--path-rule, var(--surface-rule))) 4px 9px);
+}
+
 .university-stop[data-after-lead]::before {
-  background: repeating-linear-gradient(90deg, var(--surface-rule) 0 5px, transparent 5px 9px);
+  background: repeating-linear-gradient(90deg, var(--path-dash, var(--path-rule, var(--surface-rule))) 0 5px, transparent 5px 9px);
 }
 
 .university-stop[data-lead][data-state="done"]::after,
 .university-stop[data-after-lead][data-state="done"]::before,
 .university-stop[data-after-lead][data-state="now"]::before {
-  background: repeating-linear-gradient(90deg, var(--text) 0 5px, transparent 5px 9px);
+  --path-dash: var(--text);
 }
 
 .university-stop[data-state="done"] .university-stop-label,

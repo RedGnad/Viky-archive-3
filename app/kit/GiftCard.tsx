@@ -73,6 +73,8 @@ export function GiftCard({
               <UniversityPath
                 provider={milestone.university.provider}
                 results={milestone.university.results}
+                waitedOnSetUp={milestone.university.waitedOnSetUp}
+                readByAPerson={milestone.university.readByAPerson}
                 yours={gift.role === "recipient"}
                 label={UNIVERSITY_CHOICE.path}
                 standing={{

@@ -110,7 +110,7 @@ export type MilestoneStatus = Readonly<{
    * A university gift's path (src/university-path.ts): what its university's provider is for what the gift asks, and
    * whether it asks for results. Nothing for any other gift, and on an answer made before the path existed.
    */
-  university?: Readonly<{ provider: "none" | "unpinned" | "ready" | "seconds"; results: boolean }> | null;
+  university?: Readonly<{ provider: "none" | "unpinned" | "ready" | "seconds"; results: boolean; waitedOnSetUp?: boolean; readByAPerson?: boolean }> | null;
   review: Readonly<{ status: "building" | "pending" | "refused" | "unread"; /** The refusal in its own words, where it has them: a scale that does not match. */ message?: string }> | null;
   /** Which version of its contract holds the gift (src/v2.ts). Absent on an answer made before the second existed. */
   version?: ContractVersion;

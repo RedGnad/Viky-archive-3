@@ -113,7 +113,7 @@ test("one list: the field says how many it searches, the ready come first with a
   assert.match(chooser, /<ChoiceList name="university" legend=\{W\.list\} legendHidden shape="lines" value=\{value\} onChange=\{pick\(listed\)\} options=\{listed\.slice\(0, count\)\.map\(line\)\} \/>/);
   assert.equal(chooser.split("<ChoiceList").length, 2, "one list, not two groups");
   // The mark on the line of a ready one, and nothing on the others: no "on request", no "more".
-  assert.match(chooser, /readyFor\(one, sense\) \? <span className=\{READY_MARK\}>\{W\.ready\}<\/span> : <span className=\{META\}>\{W\.readyInTwoDays\}<\/span>,/);
+  assert.match(chooser, /readyFor\(one, sense\) \? <span className=\{READY_MARK\}>\{W\.ready\}<\/span> : pathFor\(one, sense\) === "none" \? <span className=\{META\}>\{W\.readyInTwoDays\}<\/span> : undefined,/);
   assert.doesNotMatch(chooser, /W\.more|moreAlone|countInWords|note=\{/);
   const words = Object.values(UNIVERSITY_CHOICE).map((said) => (typeof said === "function" ? (said as (count?: string) => string)("3") : said));
   assert.doesNotMatch(JSON.stringify(words), /on request|more|Yours isn't|Add your/i);
@@ -137,7 +137,7 @@ test("under the university chosen, the gift's path and one line; on the list, ev
   // The line under it: what a first gift adds, nothing for a university that is ready, and for results that the money waits.
   assert.match(chooser, /if \(sense === "results"\) return W\.waitsMeanwhile;\n\s+return provider === "none" \? W\.firstGift : provider === "unpinned" \? W\.firstProof : null;/);
   // On the list: no time on any line of a gift on results; the sun on the ready ones, the country's small type on the rest.
-  assert.match(chooser, /mark: sense === "results" \? undefined : readyFor\(one, sense\) \? <span className=\{READY_MARK\}>\{W\.ready\}<\/span> : <span className=\{META\}>\{W\.readyInTwoDays\}<\/span>,/);
+  assert.match(chooser, /mark: sense === "results" \? undefined : readyFor\(one, sense\) \? <span className=\{READY_MARK\}>\{W\.ready\}<\/span> : pathFor\(one, sense\) === "none" \? <span className=\{META\}>\{W\.readyInTwoDays\}<\/span> : undefined,/);
   // Said from the list, by what the gift asks, and not at all while the list is unread: either line would be a guess.
   assert.match(chooser, /const one = Array\.isArray\(index\) \? index\.find\(\(entry\) => entry\.one\.pair === draft\.course\)\?\.one : undefined;/);
   // So the list is read for a university already chosen, the sheet open or not.

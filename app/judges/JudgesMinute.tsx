@@ -133,15 +133,18 @@ export function JudgesMinute({
               </p>
             </div>
           </div>
-          <p>
-            {/* A university ready on Reclaim's own check, from its row as it stands (src/university-ready.ts). */}
-            {readyOnReclaim.map((name) => (
-              <span key={name} data-ready-on-reclaim="">
-                {name}: ready today, on a check approved by Reclaim.{" "}
-              </span>
-            ))}
-            {moreUniversities !== null && moreUniversities > 0 ? <span>{countInWords(moreUniversities)} more: each set up within two days of a first gift.</span> : null}
-          </p>
+          {/* Nothing where neither could be read: no empty line is left under the paths. */}
+          {readyOnReclaim.length > 0 || (moreUniversities !== null && moreUniversities > 0) ? (
+            <p>
+              {/* A university ready on Reclaim's own check, from its row as it stands (src/university-ready.ts). */}
+              {readyOnReclaim.map((name) => (
+                <span key={name} data-ready-on-reclaim="">
+                  {name}: ready today, on a check approved by Reclaim.{" "}
+                </span>
+              ))}
+              {moreUniversities !== null && moreUniversities > 0 ? <span>{countInWords(moreUniversities)} more: each set up within two days of a first gift.</span> : null}
+            </p>
+          ) : null}
         </dd>
         <dt className={MUTED}>Where it runs</dt>
         <dd className={HELP} data-minute="addresses">

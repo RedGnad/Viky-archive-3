@@ -1,7 +1,7 @@
 "use client";
 import { useLayoutEffect, useRef } from "react";
 import { MOTION } from "@/src/design-tokens";
-import { drawnStops, standingOn, stopsOf, type PathProvider, type PathStanding } from "@/src/university-path";
+import { drawnStops, standingOn, stopsOf, type PathOf, type PathStanding } from "@/src/university-path";
 import { HELP, META } from "../components/ui";
 import { HadOrNot } from "./HadOrNot";
 import { reduced } from "./Motion";
@@ -23,13 +23,14 @@ import { reduced } from "./Motion";
 export function UniversityPath({
   provider,
   results,
+  waitedOnSetUp = false,
+  readByAPerson = false,
   yours,
   standing = null,
   setUpBy = null,
   label,
-}: Readonly<{
-  provider: PathProvider;
-  results: boolean;
+}: PathOf &
+  Readonly<{
   /** Whether the reader is the person the gift is for: the last stop is "Yours" to them and "Theirs" to anybody else. */
   yours: boolean;
   /** Where the gift stands. Nothing under a chosen university and on the judges page: no character, every stop to come. */
@@ -39,7 +40,7 @@ export function UniversityPath({
   /** What the drawing is, for a reader who does not see it. */
   label: string;
 }>) {
-  const stops = stopsOf({ provider, results });
+  const stops = stopsOf({ provider, results, waitedOnSetUp, readByAPerson });
   const at = standing ? standingOn(stops, standing) : null;
   const drawn = drawnStops(stops, at, { yours, setUpBy });
   const here = drawn.findIndex((stop) => stop.state === "now");

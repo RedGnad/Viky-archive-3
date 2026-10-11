@@ -12,6 +12,10 @@
  * none, one that carries no pin yet, or one that is ready (src/university-ready.ts). A time is written only where
  * somebody waits on us, and "in seconds" only where a proof is paid with nobody reading it and no agent writing its
  * rule on the way: a fixed rule, or a check that is Reclaim's own.
+ *
+ * A gift keeps the stops it went through. The first gift at a university waits at Set up and is read at Checked, and
+ * once both are behind it the university's rows say "ready": drawn from the rows alone, its path would lose the two
+ * stops it had just passed. So a gift also says what it waited on itself, and those stops stay on its path, passed.
  */
 export type PathProvider = "none" | "unpinned" | "ready" | "seconds";
 export type PathStopId = "results" | "setUp" | "shown" | "checked" | "theirs";
@@ -19,15 +23,26 @@ export type PathStop = Readonly<{ id: PathStopId; /** Happens once for a univers
 
 export const PATH_TIMES = { setUp: "once, 2 days", checked: "once, 1 day", seconds: "in seconds", results: "end of year" } as const;
 
+/** What a path is drawn from: the provider as the rows stand, and what the gift itself went through, where it is a gift's. */
+export type PathOf = Readonly<{
+  provider: PathProvider;
+  results: boolean;
+  /** This gift was made before its university was set up: it waited at Set up, whatever the rows say since. */
+  waitedOnSetUp?: boolean;
+  /** This gift's own proof was held for a person to read: it has a Checked stop, whatever the rows say since. */
+  readByAPerson?: boolean;
+}>;
+
 /** The stops of a gift, in order. */
-export function stopsOf(input: Readonly<{ provider: PathProvider; results: boolean }>): readonly PathStop[] {
+export function stopsOf(input: PathOf): readonly PathStop[] {
   const stops: PathStop[] = [];
   if (input.results) stops.push({ id: "results", once: false, time: PATH_TIMES.results });
-  else if (input.provider === "none") stops.push({ id: "setUp", once: true, time: PATH_TIMES.setUp });
+  else if (input.provider === "none" || input.waitedOnSetUp) stops.push({ id: "setUp", once: true, time: PATH_TIMES.setUp });
   stops.push({ id: "shown", once: false, time: null });
-  const ready = input.provider === "ready" || input.provider === "seconds";
-  if (!ready) stops.push({ id: "checked", once: true, time: PATH_TIMES.checked });
-  stops.push({ id: "theirs", once: false, time: input.provider === "seconds" ? PATH_TIMES.seconds : null });
+  const checked = input.provider === "none" || input.provider === "unpinned" || Boolean(input.readByAPerson);
+  if (checked) stops.push({ id: "checked", once: true, time: PATH_TIMES.checked });
+  // "In seconds" is said of a proof nobody reads: never on a path that has a person's check on it.
+  stops.push({ id: "theirs", once: false, time: !checked && input.provider === "seconds" ? PATH_TIMES.seconds : null });
   return stops;
 }
 

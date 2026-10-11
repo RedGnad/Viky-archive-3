@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { drawnStops, labelOf, PATH_TIMES, standingOn, stopsOf, timeAt, type PathStanding } from "../src/university-path";
 
@@ -74,4 +75,32 @@ test("what is drawn: stops passed, the one stood on with its own line, stops to 
   // Under a chosen university nothing has started: every stop is to come, with its time.
   const chosen = drawnStops(stopsOf({ provider: "none", results: false }), null, { yours: false, setUpBy: null });
   assert.deepEqual(chosen.map((stop) => [stop.label, stop.state, stop.time]), [["Set up", "toCome", "once, 2 days"], ["Shown", "toCome", null], ["Checked", "toCome", "once, 1 day"], ["Theirs", "toCome", null]]);
+});
+
+test("a gift keeps the stops it went through, once its university has moved on", () => {
+  // The first gift, its university set up since: the Set up stop stays, passed, and the character is on Shown.
+  const setUpSince = stopsOf({ provider: "unpinned", results: false, waitedOnSetUp: true });
+  assert.deepEqual(ids(setUpSince), ["setUp", "shown", "checked", "theirs"]);
+  assert.deepEqual(drawnStops(setUpSince, standingOn(setUpSince, STANDS), { yours: true, setUpBy: null }).map((stop) => [stop.state, stop.time]), [["done", null], ["now", "by you"], ["toCome", "once, 1 day"], ["toCome", null]]);
+  // Its proof read and the rule fixed since: both small stops stay, and "in seconds" is never said of a proof a person read.
+  const read = stopsOf({ provider: "seconds", results: false, waitedOnSetUp: true, readByAPerson: true });
+  assert.deepEqual(ids(read), ["setUp", "shown", "checked", "theirs"]);
+  assert.equal(read.at(-1)?.time, null);
+  assert.deepEqual(drawnStops(read, "theirs", { yours: true, setUpBy: null }).map((stop) => stop.state), ["done", "done", "done", "now"]);
+  // Another gift made during the setting up, whose proof nobody has to read: it waited, and is not checked.
+  assert.deepEqual(ids(stopsOf({ provider: "seconds", results: false, waitedOnSetUp: true })), ["setUp", "shown", "theirs"]);
+  // A proof held at a university set up before the gift was made: checked, with no setting up.
+  assert.deepEqual(ids(stopsOf({ provider: "ready", results: false, readByAPerson: true })), ["shown", "checked", "theirs"]);
+  // A gift on results draws no setting up, whatever it waited on.
+  assert.deepEqual(ids(stopsOf({ provider: "ready", results: true, waitedOnSetUp: true })), ["results", "shown", "theirs"]);
+  // The status reads both from the gift's own rows: the request its university was set up by, and its own review.
+  const status = readFileSync("src/milestone-status.ts", "utf8");
+  assert.match(status, /const \[request, review\] = await Promise\.all\(\[requestOf\(portal\.portalId, sense\), latestReviewOf\(giftId\)\]\);/);
+  assert.match(status, /waitedOnSetUp: Boolean\(request\?\.builtAt && madeAtSeconds \* 1000 < request\.builtAt\.getTime\(\)\),/);
+  assert.match(status, /readByAPerson: Boolean\(review\),/);
+  assert.match(status, /const university = await universityPath\(record\.giftId, milestone, state\.fundedAt\);/);
+  // And the two places a gift's path is drawn hand both on.
+  for (const file of ["app/components/GiftPage.tsx", "app/kit/GiftCard.tsx"]) {
+    assert.match(readFileSync(file, "utf8"), /waitedOnSetUp=\{milestone\.university\.waitedOnSetUp\}\n\s+readByAPerson=\{milestone\.university\.readByAPerson\}/, file);
+  }
 });
