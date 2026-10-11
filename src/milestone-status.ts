@@ -13,6 +13,8 @@ import type { MilestoneStatus } from "./milestone-view";
 import { escrowOf } from "./relayer";
 import { latestReviewOf, loadPortal, NEVER_REVIEWED, resultsExtractOf, type PortalReview, type PortalSense } from "./portal-store";
 import { GRADE_UNITS, gradeTargetInWords, scaleKey, scaleMismatch, scaleOfChoice } from "./university-shown";
+import type { PathProvider } from "./university-path";
+import { pathProviderOf } from "./university-ready";
 
 /**
  * A milestone gift as its page and its card read it (src/milestone-view.ts), from the contract, the gift's record and
@@ -28,6 +30,9 @@ export type Viewer = Readonly<{ isRecipient: boolean; isFunder: boolean; holdsTh
  */
 type UniversityWait = Readonly<{ status: "building" | PortalReview["status"] | "unread"; message?: string }>;
 
+/** A university gift's path: what its university's provider is for what the gift asks, and whether it asks for results. */
+type UniversityPath = Readonly<{ provider: PathProvider; results: boolean }>;
+
 export function milestoneStatusOf(input: {
   record: GiftRecord;
   milestone: MilestoneRecord | null;
@@ -42,6 +47,8 @@ export function milestoneStatusOf(input: {
   targetWords?: string | null;
   /** What a university gift waits on (D313): its provider being built, or its first proof's review. */
   review?: UniversityWait | null;
+  /** What a university gift's path is made of (src/university-path.ts): its university's provider for what it asks. */
+  university?: UniversityPath | null;
 }): MilestoneStatus {
   const { record, state, viewer } = input;
   const conditionId = input.milestone?.conditionId ?? "";
@@ -104,6 +111,7 @@ export function milestoneStatusOf(input: {
     wca: wcaOf(input),
     targetWords: insider ? (input.targetWords ?? null) : null,
     asked: insider && certificate ? askedInWords(certificate, Number(state.target)) : null,
+    university: input.university ?? null,
     review: !reached && input.review && input.review.status !== "pinned" ? { status: input.review.status, ...(input.review.message ? { message: input.review.message } : {}) } : null,
     version: state.version,
     end: milestoneEndOffer(state, viewer.isRecipient),
@@ -177,6 +185,21 @@ async function universityWait(giftId: string, milestone: MilestoneRecord | null)
   }
 }
 
+/**
+ * What a university gift's path is made of: the provider of its university for what it asks, as the row stands now.
+ * Nothing for any other gift, and nothing when the table cannot be read: the card then draws its character alone.
+ */
+async function universityPath(milestone: MilestoneRecord | null): Promise<UniversityPath | null> {
+  const sense = milestone ? UNIVERSITY_SENSES[milestone.conditionId] : undefined;
+  if (!sense || !milestone?.portal) return null;
+  try {
+    const portal = await loadPortal(milestone.portal);
+    return portal ? { provider: pathProviderOf(portal[sense]), results: sense === "results" } : null;
+  } catch {
+    return null;
+  }
+}
+
 /** A grade gift's target, from the contract's hundredths, on the scale it was made on or the university's pinned one. */
 async function gradeTargetWords(milestone: MilestoneRecord | null, targetUnits: number): Promise<string | null> {
   if (milestone?.conditionId !== "university-grade-shown") return null;
@@ -199,9 +222,10 @@ export async function loadMilestoneStatus(record: GiftRecord, viewer: Viewer): P
     attestedReadings(record.giftId),
   ]);
   const review = await universityWait(record.giftId, milestone);
+  const university = await universityPath(milestone);
   const targetWords = await gradeTargetWords(milestone, Number(state.target));
   const reachedAt = proven.find((reading) => reading.outcome === "reached")?.observedAt ?? null;
-  const built = milestoneStatusOf({ record, milestone, state, contract, latest, last, reachedAt, viewer, nowSeconds: Math.floor(Date.now() / 1_000), review, targetWords });
+  const built = milestoneStatusOf({ record, milestone, state, contract, latest, last, reachedAt, viewer, nowSeconds: Math.floor(Date.now() / 1_000), review, university, targetWords });
   // The month's limit, when it is reached and this gift is still running: a gift of this kind has no day to count.
   const status = { ...built, limit: await giftLimitFor(!state.settled && !state.cancelled, () => null) };
   return { status, state, contract };
