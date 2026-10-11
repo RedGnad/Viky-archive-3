@@ -8,18 +8,18 @@ import { GIFT_LIVE, SHOW_PROOF, UNIVERSITY_CHOICE } from "../src/sentences";
 import { SHOWN_CONDITIONS } from "../src/shown-conditions";
 
 /**
- * A first proof held for review is checked within an hour (the founder, 29 Sep 2026): the person reads it, and the
+ * A first proof held for review is checked within a day (the founder, 29 Sep 2026, an hour until 11 Oct): the person reads it, and the
  * operator is told by email the moment the proof is held. And the show-it block says what is kept, per condition.
  */
 
 const REVIEW = { sessionId: "session_12345678", portalId: "utoulouse-fr", sense: "enrolment" as const, giftId: "1000042" };
 
-test("a first proof held for review is said to be checked within an hour, and the operator is emailed at once", async () => {
-  assert.equal(SHOW_PROOF.held, "First proof from this university: checked within an hour.");
+test("a first proof held for review is said to be checked within a day, and the operator is emailed at once", async () => {
+  assert.equal(SHOW_PROOF.held, "First proof from this university: checked within a day.");
   assert.equal(UNIVERSITY_CHOICE.readyInTwoDays, "Ready in 2 days", "setting a university up still waits on a first gift");
   const mail = reviewAlert(REVIEW, "Université de Toulouse");
   assert.equal(ALERT_TO, "founder@viky.cash");
-  assert.equal(mail.subject, "First proof to review within the hour: Université de Toulouse (utoulouse-fr), enrolment");
+  assert.equal(mail.subject, "First proof to review within a day: Université de Toulouse (utoulouse-fr), enrolment");
   assert.match(mail.text, /gift 1000042/);
   assert.match(mail.text, /pnpm portal:pin session_12345678/);
   assert.doesNotMatch(mail.text, /Inscrit|Enrolled/, "what the page carried stays in the database, for portal:pin alone");

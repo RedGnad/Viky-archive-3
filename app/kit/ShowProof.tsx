@@ -175,7 +175,7 @@ export function ShowProof({
     };
   }, [giftId, shows]);
   // A proof under review is decided while the page stands (7 Oct 2026: the first one was, and the page went on saying
-  // "checked within an hour" to a person whose gift had been paid). A page that comes back to the front reads the gift
+  // "checked within a day" to a person whose gift had been paid). A page that comes back to the front reads the gift
   // again, so what the review decided, and the moment it owes, are there without a reload.
   const underReview = yours && (review === "pending" || review === "building");
   useEffect(() => {
