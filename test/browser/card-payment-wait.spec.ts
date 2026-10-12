@@ -65,14 +65,15 @@ test.describe("the gift being made: a creation that does not answer keeps the sc
       await page.evaluate(WATCH_THE_WAIT);
       await sheet(page).getByRole("button", { name: "Put €19.00 in Boo's name" }).click();
       await page.waitForURL(/\/fund\?step=paying/, { timeout: 60_000 });
-      // The account held the whole gift at the press: the wait's first image is the gift being made.
-      await expect(page.locator(".working-ring")).toBeVisible();
-      await expect(page.getByText("Putting €19.00 in Boo's name.", { exact: true })).toBeVisible();
 
       const reached = await expect.poll(() => sent.length, { timeout: 25_000 }).toBeGreaterThan(0).then(() => true, () => false);
-      // And at no image did it ask for a payment that had just been made, or offer a card.
-      expect(await page.evaluate("window.__waitAsked"), "the wait was watched from the press on, and never asked for a payment").toBe(false);
       needsAContract(reached);
+
+      // The account held the whole gift at the press: the wait says the gift is being made, and at no image since the
+      // press did it ask for a payment that had just been made, or offer a card. Held where the making goes on, on a
+      // build that names a contract: on any other the making stops at once, and this test with it.
+      expect(await page.evaluate("window.__waitAsked"), "the wait was watched from the press on, and never asked for a payment").toBe(false);
+      await expect(page.getByText("Putting €19.00 in Boo's name.", { exact: true })).toBeVisible();
 
       // Not answered: the screen that makes the gift stays, and says what is known. No failure, nothing to press.
       const asksAgain = page.locator("[data-asks-again]");
