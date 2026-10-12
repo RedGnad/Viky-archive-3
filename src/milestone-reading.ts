@@ -294,11 +294,13 @@ export const LOOK_MAY_FAIL_IN_THE_LAST_SECONDS = 86_400;
  *   which is every pass and not every minute of an open page.
  * - `unseen`: the look failed, or showed no rating. A proof often fails the same way, so one is taken in six hours.
  * - `unseenInTheLastDay`: the same in the gift's last day, when a reading missed can cost the whole gift: one an hour.
+ *   Fifty-five minutes and not sixty: the pass is called every hour since 12 Oct 2026, a call can arrive a little
+ *   early, and a guard of the full hour would refuse it, leaving one proof every two hours.
  *
  * Before this, the open page took a proof each minute for as long as its look failed, and so did the pass of every
  * five minutes through a gift's last day.
  */
-export const PROOF_EVERY_SECONDS = { atTheTarget: 4 * 60, unseen: 6 * 3_600, unseenInTheLastDay: 3_600 } as const;
+export const PROOF_EVERY_SECONDS = { atTheTarget: 4 * 60, unseen: 6 * 3_600, unseenInTheLastDay: 55 * 60 } as const;
 
 /**
  * How many proofs a gift at its target is given in a UTC day (the founder, 3 Oct 2026). A proof there settles the gift

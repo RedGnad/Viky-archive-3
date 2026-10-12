@@ -128,13 +128,14 @@ export async function lookBeforeCount(input: { username: string; courseId: strin
  * inside those twenty hours, and one that closes the morning after is not. The pass of half past midnight takes none:
  * the second reading comes after it, before anything closes.
  *
- * A gift read as the day goes (the third daily contract) is read by the frequent pass, whichever pass asks. When
- * this was written the scheduler called every five minutes and the pass guarded itself for fourteen
- * (src/frequent-pass.ts), so the next one came fifteen to twenty minutes later: twenty. The scheduler calls every hour
- * since 12 Oct 2026, and the twenty minutes have not followed: as they stand, a window that closes more than twenty
- * minutes after a pass, and before the next, gets no reading of last resort.
+ * A gift read as the day goes (the third daily contract) is read by the frequent pass, whichever pass asks. The
+ * scheduler calls it every hour since 12 Oct 2026 (src/frequent-pass.ts), so the next one comes an hour later:
+ * sixty-five minutes, with five for a call that comes late. It was twenty minutes while the scheduler called every
+ * five and the pass guarded itself for fourteen; kept under an hourly call, a window that closed more than twenty
+ * minutes after a pass, and before the next, got no reading of last resort. Two calls can fall inside the sixty-five
+ * minutes: the reading is taken once for a gift in a day, by the first of them.
  */
-export const LAST_RESORT_WITHIN_SECONDS = { recount: 20 * 3_600, frequent: 20 * 60 } as const;
+export const LAST_RESORT_WITHIN_SECONDS = { recount: 20 * 3_600, frequent: 65 * 60 } as const;
 
 /**
  * Whether a reading without a look is the last chance of a day: the window of the gift's oldest open day closes

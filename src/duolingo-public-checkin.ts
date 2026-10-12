@@ -54,10 +54,9 @@ export type ReadingPass = "counting" | "recount" | "frequent";
 
 /**
  * Within how long the window of a gift's oldest open day must close for a pass to take the reading of last resort, or
- * nothing when whoever asks may take none (src/daily-look.ts). A gift read as the day goes was read by a pass every
- * quarter of an hour, so any pass was its last before a window that closed within twenty minutes; the pass comes every
- * hour since 12 Oct 2026, and that number has not followed (src/daily-look.ts says what that leaves). Any other gift is
- * read in the morning, and its last pass before 06:00 is the second reading.
+ * nothing when whoever asks may take none (src/daily-look.ts). A gift read as the day goes is read by a pass every
+ * hour, so a pass is its last before a window that closes within sixty-five minutes. Any other gift is read in the
+ * morning, and its last pass before 06:00 is the second reading.
  */
 export function lastResortWithin(pass: ReadingPass | undefined, version: ContractVersion): number | null {
   if (!pass) return null;
