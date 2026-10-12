@@ -477,7 +477,7 @@ async function providersWaited(): Promise<readonly WaitingProvider[]> {
 
 /**
  * The summary of the day before, when it is due: a morning of the judging, from six o'clock UTC, once. Asked by the
- * call that already arrives every five minutes (app/api/cron/milestones), so it leaves within minutes of six.
+ * call that already arrives every hour (app/api/cron/milestones), so it leaves within the hour after six.
  */
 export async function morningSummaryDue(nowMs: number = Date.now(), deps: MorningSummaryDeps = { claim: claimPass, spent: spentOn, use: cycleUse, waiting: providersWaited }): Promise<Alert | null> {
   const now = new Date(nowMs);

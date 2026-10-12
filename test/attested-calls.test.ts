@@ -449,12 +449,12 @@ test("the morning's summary leaves once a day, from six o'clock UTC, and only du
   assert.deepEqual(asked, [Date.parse("2026-10-13T00:00:00Z")], "the day before, whole");
   assert.equal(await due("2026-10-14T06:06:00Z"), null, "once");
   assert.equal(await due("2026-10-14T23:55:00Z"), null);
-  // A morning the five-minute call missed is still told, later that day.
+  // A morning the hourly call missed is still told, later that day.
   assert.equal(await due("2026-10-15T13:20:00Z"), "Reclaim, 14 Oct 2026: 1 proof spent, 88 left until 1 Dec 2026");
   assert.equal(await due("2026-11-03T06:00:00Z"), "Reclaim, 2 Nov 2026: 1 proof spent, 88 left until 1 Dec 2026", "the last morning");
   assert.equal(await due("2026-11-04T06:00:00Z"), null, "the judging is over");
   assert.equal(claimed.length, 3);
-  // It rides the call that already arrives every five minutes, and leaves through the operator's alerts.
+  // It rides the call that already arrives every hour, and leaves through the operator's alerts.
   const route = readFileSync("app/api/cron/milestones/route.ts", "utf8");
   assert.match(route, /const summary = await morningSummaryDue\(\);\n\s+if \(summary\) await sendAlert\(summary\);/);
 });

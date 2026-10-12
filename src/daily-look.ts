@@ -26,8 +26,7 @@ import { paysTheSameDay } from "./v2";
  * them in five hours on 30 Sep. One reading goes without a look, the reading of last resort: taken by a pass, once
  * for a gift in a day, and only when the window of the gift's oldest open day closes before the next pass that could
  * read it. Until then the day stays open and the next pass looks again, which costs nothing. On the first two
- * versions that pass is the second reading of the morning; on the third, the last pass of the quarter of an hour
- * before the window closes.
+ * versions that pass is the second reading of the morning; on the third, the last pass before the window closes.
  */
 
 /** The days a contract holds for a gift, and which version of the daily contract holds them: the rule is the version's. */
@@ -129,9 +128,11 @@ export async function lookBeforeCount(input: { username: string; courseId: strin
  * inside those twenty hours, and one that closes the morning after is not. The pass of half past midnight takes none:
  * the second reading comes after it, before anything closes.
  *
- * A gift read as the day goes (the third daily contract) is read by a pass every quarter of an hour, whichever pass
- * asks. The scheduler calls every five minutes and the pass guards itself for fourteen (src/frequent-pass.ts), so the
- * next one comes fifteen to twenty minutes later: twenty.
+ * A gift read as the day goes (the third daily contract) is read by the frequent pass, whichever pass asks. When
+ * this was written the scheduler called every five minutes and the pass guarded itself for fourteen
+ * (src/frequent-pass.ts), so the next one came fifteen to twenty minutes later: twenty. The scheduler calls every hour
+ * since 12 Oct 2026, and the twenty minutes have not followed: as they stand, a window that closes more than twenty
+ * minutes after a pass, and before the next, gets no reading of last resort.
  */
 export const LAST_RESORT_WITHIN_SECONDS = { recount: 20 * 3_600, frequent: 20 * 60 } as const;
 

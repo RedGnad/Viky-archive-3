@@ -385,7 +385,7 @@ test("which gifts are read as the day goes: on the third contract, on a source t
   assert.match(count, /readDailyGift\(live \? \{ giftId: id, purpose: "count", lookOnly: look \} : \{ giftId: id, purpose: "count", force: true \}\)/);
 });
 
-test("the pass of every quarter of an hour reads those gifts alone, one after another, and one failure is one line", async () => {
+test("the pass of every hour reads those gifts alone, one after another, and one failure is one line", async () => {
   await withVersions(true, async () => {
     const asked: string[] = [];
     const lines = await frequentDailyPass({

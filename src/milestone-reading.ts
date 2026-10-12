@@ -323,10 +323,10 @@ async function readMilestone(
     force?: boolean;
     recentSeconds?: number;
     /**
-     * Set by the pass that runs every five minutes (src/frequent-pass.ts; the audit of 1 Oct 2026, F-08): when the
-     * look fails, a limit met, a wait that ran out, a body that cannot be read, no proof is paid for and the reading
-     * stops there. Otherwise a source that falters for an hour costs two attested fetches per gift every five minutes
-     * and uses up the month's allowance, after which nothing attested can be read for anybody. It is lifted in a
+     * Set by the frequent pass (src/frequent-pass.ts; the audit of 1 Oct 2026, F-08, when it ran every five minutes;
+     * every hour since 12 Oct 2026): when the look fails, a limit met, a wait that ran out, a body that cannot be read,
+     * no proof is paid for and the reading stops there. Otherwise a source that faltered for an hour cost two attested
+     * fetches per gift at every pass and used up the month's allowance, after which nothing attested can be read for anybody. It is lifted in a
      * gift's last day, and never set for a reading a person's page asks for: there the proof is still taken, as often
      * as `PROOF_EVERY_SECONDS` lets it.
      */
