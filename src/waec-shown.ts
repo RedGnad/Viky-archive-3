@@ -14,9 +14,9 @@ import { MILESTONE_MAX_DURATION_DAYS } from "./milestone-protocol";
  *
  * The page, read 24 Sep 2026: the checker posts the five values to `/Result/EncryptPayload`, which answers a token `q`
  * (a new one each time), then opens `/Result/Display?q=<q>`; no captcha. The result's shape was read on a real result
- * published in a public repository (Bappa-Kamba/credly, `backend/sample_result.html`, WASSCE for school candidates
- * 2018): `tbCandidInfo` (examination number, name, examination, centre), `tbSubjectGrades` (a subject and its grade
- * per row), `tbWithHeld`. Three fields are extracted: the examination, the grades table, the withheld table.
+ * published in a public repository (WASSCE for school candidates 2018): `tbCandidInfo` (examination number, name,
+ * examination, centre), `tbSubjectGrades` (a subject and its grade per row), `tbWithHeld`. Three fields are
+ * extracted: the examination, the grades table, the withheld table.
  *
  * What a gift is for: credits, grades A1 to C6, English Language and Mathematics among them, the standard universities
  * across the region ask for. Without both, the result counts as none. The verdict rule (D185) keeps the count only.
