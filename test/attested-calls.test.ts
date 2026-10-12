@@ -679,7 +679,7 @@ test("the judges page says the cycle's count from the journal, the limit when it
   assert.match(page, /\{reclaimLimits\?\.readings \? ` The limit of readings is reached: [^`]*"\$\{LIMIT\.said\("Duolingo", "readings", startsAgainInWords\(\)\)\}"` : ""\}/, "the same sentence a person reads");
   assert.match(page, /\{reclaimLimits\?\.proofs \? ` The limit of proofs is reached: [^`]*"\$\{LIMIT\.said\("their university", "proofs", startsAgainInWords\(\)\)\}"` : ""\}/);
   assert.match(page, /once in \{PROOF_EVERY_SECONDS\.unseen \/ 3_600\} hours after a look that failed or showed no rating, once an hour in the gift&apos;s last day, and every \{PROOF_EVERY_SECONDS\.atTheTarget \/ 60\} minutes at the target/);
-  assert.equal(PROOF_EVERY_SECONDS.unseenInTheLastDay, 3_600, "once an hour, as the page says in words");
+  assert.equal(PROOF_EVERY_SECONDS.unseenInTheLastDay, 55 * 60, "once an hour, as the page says in words: the guard is five minutes under it, so an hourly call that comes early is not refused");
   // What was counted before the journal began is said only for the cycle it is about.
   assert.match(page, /\{reclaimUse\?\.from === BEFORE_THE_JOURNAL\.cycleFrom \? ` Of this cycle's fetches, \$\{BEFORE_THE_JOURNAL\.started\} were started before the journal began and each gave a proof, counted on 3 Oct 2026 from the reading service's logs: two on 1 Oct, two on 2 Oct, one on 3 Oct\.` : ""\}/);
   assert.equal(BEFORE_THE_JOURNAL.started, BEFORE_THE_JOURNAL.proved, "each gave a proof");

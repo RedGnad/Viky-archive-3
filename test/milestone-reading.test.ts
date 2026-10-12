@@ -434,7 +434,7 @@ test("the frequent pass pays for no proof when the look itself fails, except in 
 });
 
 test("a proof is claimed before it is paid for: once in six hours after a look that failed, once an hour in the last day, every four minutes at the target (3 Oct 2026)", async () => {
-  assert.deepEqual(PROOF_EVERY_SECONDS, { atTheTarget: 4 * 60, unseen: 6 * 3_600, unseenInTheLastDay: 3_600 });
+  assert.deepEqual(PROOF_EVERY_SECONDS, { atTheTarget: 4 * 60, unseen: 6 * 3_600, unseenInTheLastDay: 55 * 60 });
   const failing = { plain: async () => Promise.reject(new ChessReadError("FETCH_FAILED", "Chess.com answered 404")), attest: async () => attested(1960) };
   const claims: Array<[string, number]> = [];
   const claim = (granted: boolean) => ({
@@ -458,7 +458,7 @@ test("a proof is claimed before it is paid for: once in six hours after a look t
   const lastDay = { ...CLIMBING, deadline: NOW + 86_400 - 1 };
   run = harness(BOUND, lastDay, { ...failing, ...claim(false), attest: async () => assert.fail("no proof at every pass") });
   assert.equal((await runMilestoneReading({ giftId: "1000000", purpose: "reach", lookMustSucceed: true }, run.deps)).kind, "refused");
-  assert.deepEqual(claims, [["1000000", 3_600]]);
+  assert.deepEqual(claims, [["1000000", 55 * 60]]);
   // Before its last day that pass stops at the look, and claims nothing.
   claims.length = 0;
   run = harness(BOUND, CLIMBING, { ...failing, ...claim(true) });
