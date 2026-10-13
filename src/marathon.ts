@@ -22,7 +22,7 @@ import { MILESTONE_MAX_DURATION_DAYS } from "./milestone-protocol";
  * is a reference like `1488071608761-442` and a heat like `marathon`. The results list is one page whose rows are
  * embedded, base64 of the bytes XOR "K", decoded by the page's own script (no further call), so it cannot be matched
  * by a pattern; each runner has a page of their own instead, `/bc/resultats/coureur.jsp?ref=<ref>&heat=<heat>&dossard=<bib>`,
- * server-rendered: the name and the bib in its title ("MODELE Ibou (N°347)"), and "Temps Officiel" with its value. A
+ * server-rendered: the name and the bib in its title ("MODELE Sam (N°900347)"), and "Temps Officiel" with its value. A
  * runner who did not finish (DNF, DNS) has the page with "00:00:00"; a bib nobody wore answers an empty page.
  */
 
@@ -229,7 +229,7 @@ export function racesOffered(nowMs: number, operator: boolean): readonly Maratho
   return MARATHON_RACES.filter((race) => timerOpen(race.timer) && (race.operatorOnly ? operator : bibStillOpen(race, nowMs)));
 }
 
-/** A bib as a timing company prints it: one to six figures, which MikaTiming may prefix with a letter or two ("F3166" at Frankfurt). */
+/** A bib as a timing company prints it: one to six figures, which MikaTiming may prefix with a letter or two ("F12345" at Frankfurt). */
 export function isValidBib(value: string, timer: MarathonTimer = "mika-timing"): boolean {
   const bib = value.trim().toUpperCase();
   if (timer === "breizh-chrono") return /^\d{1,6}$/.test(bib);
@@ -269,7 +269,7 @@ export function mikaAccountOf(account: string): Readonly<{ host: string; year: s
 }
 
 /**
- * A runner's name as MikaTiming prints it, "Dr. Example, Lars Ove (NOR)" (measured at Frankfurt, Chicago, Berlin and
+ * A runner's name as MikaTiming prints it, "Dr. Example, Ada Lin (SUI)" (measured at Frankfurt, Chicago, Berlin and
  * Boston on 26 Sep 2026), brought to what a funder would write: the nation in brackets and a title before the name
  * dropped, the comma between the names a space. The order of the names never counts (`normaliseCertificateName`).
  */
@@ -296,7 +296,7 @@ export function sameRunner(printed: string, written: string): boolean {
 
 export const DAY_SECONDS = 24 * 60 * 60;
 
-/** "02:30:05", as the page prints an official time, in seconds; nothing for "00:00:00", a runner who did not finish. */
+/** "02:47:19", as the page prints an official time, in seconds; nothing for "00:00:00", a runner who did not finish. */
 export function finishSecondsOf(printed: string): number | undefined {
   const match = /^(\d{1,2}):(\d{2}):(\d{2})$/.exec(printed.trim());
   if (!match) return undefined;

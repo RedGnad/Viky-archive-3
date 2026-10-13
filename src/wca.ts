@@ -97,7 +97,7 @@ export function wcaTargetInWords(target: number): string {
 
 /**
  * A competitor's name without what the WCA prints after it in parentheses, which is the same name in the person's own
- * script: "Yiheng Wang (王艺衡)" is Yiheng Wang (the audit of 1 Oct 2026). A funder writes the name as people say it,
+ * script: "Ada Example (艾达)" is Ada Example (the audit of 1 Oct 2026). A funder writes the name as people say it,
  * the API prints both, and compared whole the two never matched, so such a person's result paid nothing. Only a
  * parenthesis that ends the name is dropped, and a name that is nothing else is kept as it is.
  */

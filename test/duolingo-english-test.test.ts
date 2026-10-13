@@ -48,7 +48,7 @@ test("anything that is not one of their links gives nothing, rather than a guess
     assert.equal(detAliasOf(pasted), undefined, pasted);
   }
   // Eight characters is the oldest shape they issued, so that is the shortest thing accepted and "short1" is not one.
-  assert.equal(detAliasOf("https://certs.duolingo.com/rwfxb4dp"), "rwfxb4dp");
+  assert.equal(detAliasOf("https://certs.duolingo.com/abcd1234"), "abcd1234");
   assert.ok(isValidDetAlias("0123456789abcdef0123456789abcdef"), "the thirty-two character shape");
 });
 
