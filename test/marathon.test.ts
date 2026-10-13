@@ -11,9 +11,9 @@ import { MILESTONE_GOALS } from "../src/milestone-goals";
 
 /**
  * "Finish a marathon" (D273). The page below is a runner's own page on Breizh Chrono, measured on the Marathon de
- * Dakar 2023 on 26 Sep 2026 (bib 347), trimmed to what is read, with an invented runner.
+ * Dakar 2023 on 26 Sep 2026, trimmed to what is read, with invented runners and a bib no race gives.
  */
-const ACCOUNT = "1488071608761-442|marathon|347";
+const ACCOUNT = "1488071608761-442|marathon|900347";
 function runnerPage(name: string, bib: string, official: string): string {
   return `<div class="col-12 col-md-6"> <div class=""> <h1 class="title pb-2 text-center" >${name} (N°${bib})</h1> </div>
 <div class="col-6 col-md-2 text-center mx-2 d-flex flex-column justify-content-center"> <span class="timeTitle">Temps Officiel</span> <span class="timeValue">${official}</span> </div>
@@ -27,46 +27,46 @@ function valuesOf(page: string): Record<string, string> {
 const refused = (code: string) => (error: unknown) => error instanceof MarathonReadError && error.code === code;
 
 test("the account is the race's reference, its heat and the bib, and nothing else reads", () => {
-  assert.equal(marathonAccount(MARATHON_RACES[0], MARATHON_RACES[0].events[0], " 347 "), ACCOUNT);
-  assert.deepEqual(marathonAccountOf(ACCOUNT), { ref: "1488071608761-442", heat: "marathon", bib: "347" });
+  assert.equal(marathonAccount(MARATHON_RACES[0], MARATHON_RACES[0].events[0], " 900347 "), ACCOUNT);
+  assert.deepEqual(marathonAccountOf(ACCOUNT), { ref: "1488071608761-442", heat: "marathon", bib: "900347" });
   assert.equal(marathonAccountOf("1488071608761-442|marathon|../x"), undefined);
   assert.ok(BREIZH_CHRONO_RUNNER.accepts(ACCOUNT) && !BREIZH_CHRONO_RUNNER.accepts("x|y|z"));
-  assert.equal(BREIZH_CHRONO_RUNNER.url(ACCOUNT), "https://resultats.breizhchrono.com/bc/resultats/coureur.jsp?ref=1488071608761-442&heat=marathon&dossard=347");
-  assert.ok(isValidBib("347", "breizh-chrono") && isValidBib("1", "breizh-chrono") && !isValidBib("A347", "breizh-chrono") && !isValidBib("1234567", "breizh-chrono"));
-  // MikaTiming prints a letter or two before some bibs ("F3166", the women's bibs at Frankfurt).
-  assert.ok(isValidBib("F3166", "mika-timing") && isValidBib("f3166") && isValidBib("21735") && !isValidBib("FFF1") && !isValidBib("3166F"));
+  assert.equal(BREIZH_CHRONO_RUNNER.url(ACCOUNT), "https://resultats.breizhchrono.com/bc/resultats/coureur.jsp?ref=1488071608761-442&heat=marathon&dossard=900347");
+  assert.ok(isValidBib("900347", "breizh-chrono") && isValidBib("1", "breizh-chrono") && !isValidBib("A347", "breizh-chrono") && !isValidBib("1234567", "breizh-chrono"));
+  // MikaTiming prints a letter or two before some bibs ("F903166", the women's bibs at Frankfurt).
+  assert.ok(isValidBib("F903166", "mika-timing") && isValidBib("f3166") && isValidBib("900735") && !isValidBib("FFF1") && !isValidBib("903166F"));
 });
 
 test("the two patterns read a runner's page: the name, the bib and the official time", () => {
-  const result = marathonResultOf(ACCOUNT, valuesOf(runnerPage("EXAMPLE Ada", "347", "02:30:05")));
+  const result = marathonResultOf(ACCOUNT, valuesOf(runnerPage("EXAMPLE Ada", "900347", "02:47:19")));
   assert.equal(result.runner, "EXAMPLE Ada");
-  assert.equal(result.bib, "347");
-  assert.equal(result.finishSeconds, 2 * 3600 + 30 * 60 + 5);
+  assert.equal(result.bib, "900347");
+  assert.equal(result.finishSeconds, 2 * 3600 + 47 * 60 + 19);
   assert.equal(result.metric, DAY_SECONDS - result.finishSeconds);
   assert.equal(result.subject, marathonSubject("Ada Example", "dakar-2023/marathon"), "no case, no accents, no order");
-  assert.throws(() => marathonResultOf(ACCOUNT, valuesOf(runnerPage("TINE Abdou", "347", "00:00:00"))), refused("NOT_FINISHED"), "a runner who did not finish");
-  assert.throws(() => marathonResultOf(ACCOUNT, valuesOf(runnerPage("EXAMPLE Ada", "348", "02:30:05"))), refused("ANOTHER_BIB"));
+  assert.throws(() => marathonResultOf(ACCOUNT, valuesOf(runnerPage("EXAMPLE Noor", "900347", "00:00:00"))), refused("NOT_FINISHED"), "a runner who did not finish");
+  assert.throws(() => marathonResultOf(ACCOUNT, valuesOf(runnerPage("EXAMPLE Ada", "900348", "02:47:19"))), refused("ANOTHER_BIB"));
   assert.throws(() => marathonResultOf(ACCOUNT, valuesOf("")), refused("NO_RESULT"), "the empty page of a bib nobody wore");
-  assert.throws(() => marathonResultOf("1488071608761-999|marathon|347", {}), refused("UNKNOWN_RACE"));
+  assert.throws(() => marathonResultOf("1488071608761-999|marathon|900347", {}), refused("UNKNOWN_RACE"));
 });
 
 test("the name ties: capitals, accents and the order of the names do not matter; another name does", () => {
-  assert.ok(sameRunner("MODELE Ibou", "Ibou Modele"));
-  assert.ok(sameRunner("NDIAYE Aïssatou", "aissatou ndiaye"));
-  assert.ok(!sameRunner("MODELE Ibou", "Modele Moussa"));
+  assert.ok(sameRunner("MODELE Sam", "Sam Modele"));
+  assert.ok(sameRunner("EXEMPLE Aïda", "aida exemple"));
+  assert.ok(!sameRunner("MODELE Sam", "Modele Lou"));
   assert.ok(!sameRunner("", ""));
 });
 
 test("the time and the target: seconds under a day, finish is one, under X hours is that time's metric", () => {
-  assert.equal(finishSecondsOf("02:30:05"), 9005);
+  assert.equal(finishSecondsOf("02:47:19"), 10039);
   assert.equal(finishSecondsOf("00:00:00"), undefined);
   assert.equal(finishSecondsOf("2:30"), undefined);
   assert.equal(marathonTargetUnderHours(4), DAY_SECONDS - 4 * 3600);
-  assert.ok(DAY_SECONDS - 9005 >= marathonTargetUnderHours(4), "2:30:05 is under 4 hours");
-  assert.ok(DAY_SECONDS - 9005 < marathonTargetUnderHours(2.5), "and not under 2 h 30");
+  assert.ok(DAY_SECONDS - 10039 >= marathonTargetUnderHours(4), "2:47:19 is under 4 hours");
+  assert.ok(DAY_SECONDS - 10039 < marathonTargetUnderHours(2.5), "and not under 2 h 30");
   assert.equal(marathonTargetInWords(MARATHON_FINISH), "finish the race");
   assert.equal(marathonTargetInWords(marathonTargetUnderHours(4.5)), "finish in under 4 h 30");
-  assert.equal(finishInWords(9005), "2:30:05");
+  assert.equal(finishInWords(10039), "2:47:19");
   assert.equal(MARATHON_MILESTONE.targetUnits?.(0), MARATHON_FINISH);
   assert.equal(MARATHON_MILESTONE.targetUnits?.(4), marathonTargetUnderHours(4));
   assert.ok(MARATHON_MILESTONE.validTarget(0) && MARATHON_MILESTONE.validTarget(4.5) && !MARATHON_MILESTONE.validTarget(24) && !MARATHON_MILESTONE.validTarget(-1));
@@ -83,7 +83,7 @@ test("a plain read refuses by name when the page is not there", async () => {
   const answer = (status: number, body = "") => async () => new Response(body, { status });
   await assert.rejects(readMarathonResult(ACCOUNT, answer(200, "")), refused("NO_RESULT"));
   await assert.rejects(readMarathonResult(ACCOUNT, answer(503)), refused("FETCH_FAILED"));
-  const read = await readMarathonResult(ACCOUNT, answer(200, runnerPage("EXAMPLE Ada", "347", "03:59:59")));
+  const read = await readMarathonResult(ACCOUNT, answer(200, runnerPage("EXAMPLE Ada", "900347", "03:59:59")));
   assert.equal(read.official, "03:59:59");
 });
 
@@ -96,7 +96,7 @@ test("the line: read for them, Move, goal 30, open, the fact rule, a name asked"
   assert.equal(conditionById("marathon-finish"), LINE);
   assert.equal(certificateById("marathon-finish"), MARATHON_MILESTONE);
   assert.equal(MARATHON_MILESTONE.asksName, true);
-  assert.ok(MARATHON_MILESTONE.validName("Ibou Modele") && !MARATHON_MILESTONE.validName("Ibou"));
+  assert.ok(MARATHON_MILESTONE.validName("Sam Modele") && !MARATHON_MILESTONE.validName("Ibou"));
   assert.equal(MARATHON_MILESTONE.course?.search?.races, true);
   assert.ok(proofOfCondition("marathon-finish"));
   assert.equal(privacyOf(LINE).kept, "fact");
@@ -127,7 +127,7 @@ const RECORD = {
   goalType: MARATHON_GOAL_TYPE,
   recipient: RECIPIENT,
   escrow: CONTRACT,
-  goalUsername: "347",
+  goalUsername: "900347",
   usernameSource: "recipient",
   boundAt: new Date((NOW - 3_600) * 1_000),
   recipientName: "Ibou",
@@ -139,7 +139,7 @@ const STATE = {
   recipient: RECIPIENT,
   shape: SHAPE_HAVE_OR_NOT,
   goalType: MARATHON_GOAL_TYPE,
-  subject: marathonSubject("Ibou Modele", `${RACE.raceId}/marathon`),
+  subject: marathonSubject("Sam Modele", `${RACE.raceId}/marathon`),
   target: BigInt(MARATHON_FINISH),
   maximumStart: 0n,
   fundedAt: NOW - 86_400,
@@ -163,9 +163,9 @@ const READ: MilestoneReading = {
   giftId: "1000002",
   purpose: "reach",
   attested: true,
-  username: "MODELE Ibou",
-  playerId: "347",
-  rating: 9_005,
+  username: "MODELE Sam",
+  playerId: "900347",
+  rating: 10_039,
   ratedAt: null,
   rd: null,
   observedAt: NOW - 60,
@@ -185,10 +185,10 @@ test("the status carries the race, whether the bib is still open, and the bib an
   assert.ok(recipient);
   assert.equal(recipient.raceName, RACE.name);
   assert.equal(recipient.bibOpen, false, "the 2023 race has started");
-  assert.equal(recipient.bib, "347");
-  assert.deepEqual(recipient.result, { runner: "MODELE Ibou", bib: "347", official: "2:30:05", finishSeconds: 9_005 });
-  assert.equal(status(viewer({ isFunder: true }), READ)?.bib, "347", "the funder wrote the name and sees the bib");
-  assert.equal(status(viewer({ holdsTheLink: true }), READ)?.result?.runner, "MODELE Ibou", "the link reads names, so it reads the line");
+  assert.equal(recipient.bib, "900347");
+  assert.deepEqual(recipient.result, { runner: "MODELE Sam", bib: "900347", official: "2:47:19", finishSeconds: 10_039 });
+  assert.equal(status(viewer({ isFunder: true }), READ)?.bib, "900347", "the funder wrote the name and sees the bib");
+  assert.equal(status(viewer({ holdsTheLink: true }), READ)?.result?.runner, "MODELE Sam", "the link reads names, so it reads the line");
   const reader = status(viewer({}), READ);
   assert.ok(reader);
   assert.equal(reader.bib, null, "a reader without the link sees no bib");
@@ -203,13 +203,13 @@ test("the proof leaves the line read with the reading, and answers it, so the pa
     loadGift: async () => RECORD,
     readState: async () => STATE,
     attest: async () => ({
-      subject: marathonSubject("Ibou Modele", `${RACE.raceId}/marathon`),
-      score: DAY_SECONDS - 9_005,
+      subject: marathonSubject("Sam Modele", `${RACE.raceId}/marathon`),
+      score: DAY_SECONDS - 10_039,
       testDay: NOW - 60,
       observedAt: NOW - 60,
       nullifier: `0x${"5f".repeat(32)}` as Hex,
       providerId: marathonProviderId(),
-      line: { username: "MODELE Ibou", playerId: "347", rating: 9_005 },
+      line: { username: "MODELE Sam", playerId: "900347", rating: 10_039 },
     }),
     prove: async ({ message }) => {
       sent.push(message);
@@ -222,13 +222,13 @@ test("the proof leaves the line read with the reading, and answers it, so the pa
   };
   const outcome = await proveCertificate({ giftId: "1000002", link: ACCOUNT }, deps);
   assert.equal(outcome.kind, "reached");
-  assert.deepEqual(outcome.kind === "reached" ? outcome.line : null, { runner: "MODELE Ibou", bib: "347", official: "2:30:05", finishSeconds: 9_005 });
+  assert.deepEqual(outcome.kind === "reached" ? outcome.line : null, { runner: "MODELE Sam", bib: "900347", official: "2:47:19", finishSeconds: 10_039 });
   assert.equal(sent.length, 1);
-  assert.equal(sent[0].metricValue, BigInt(DAY_SECONDS - 9_005), "the contract judges the seconds under a day, not the line");
+  assert.equal(sent[0].metricValue, BigInt(DAY_SECONDS - 10_039), "the contract judges the seconds under a day, not the line");
   assert.equal(recorded.length, 1);
-  assert.equal(recorded[0].username, "MODELE Ibou");
-  assert.equal(recorded[0].playerId, "347");
-  assert.equal(recorded[0].rating, 9_005, "the finish time is what the page shows back, so it is what is kept");
+  assert.equal(recorded[0].username, "MODELE Sam");
+  assert.equal(recorded[0].playerId, "900347");
+  assert.equal(recorded[0].rating, 10_039, "the finish time is what the page shows back, so it is what is kept");
   assert.equal(typeof attestByGoal, "function", "the rehearsal script runs the real reading through the same door");
 });
 
@@ -343,89 +343,89 @@ test("a race already run is offered to nobody but an operator's account, and a c
 });
 
 /**
- * MikaTiming, the second timing company (the founder, 27 Sep 2026), measured on 26 Sep 2026 at Frankfurt 2025 (bib
- * 3166, and its lettered twin F3166), Chicago 2025, Berlin 2025 and Boston 2026. The pages below are those, trimmed
- * to what is read.
+ * MikaTiming, the second timing company (the founder, 27 Sep 2026), measured on 26 Sep 2026 at Frankfurt 2025 (a bib
+ * and its lettered twin), Chicago 2025, Berlin 2025 and Boston 2026. The pages below are those, trimmed to what is
+ * read, with invented runners: names, nation, time, the site's own id for them, and bibs no race gives.
  */
 const MIKA_SEARCH = `<ul class="list-group list-group-multicolumn"><li class=" list-group row list-group-item list-group-header "><div>Place</div></li>
-<li class=" list-active event-L_HCH3BKLB3B8 list-group-item row"> <div class="row"> <h4 class=" list-field type-fullname"><a href="?content=detail&amp;fpid=search&amp;pid=search&amp;idp=HCH3BKLB000001&amp;lang=EN_CAP&amp;event=L_HCH3BKLB3B8&amp;search%5Bstart_no%5D=3166&amp;search_event=L_HCH3BKLB3B8">Dr. Example, Lars Ove (NOR)</a></h4> </div>
-<div class=" list-field type-field" style="width: 50px"><div class="visible-xs-block visible-sm-block list-label">Bib Number</div>3166</div> </li>
-<li class=" event-L_HCH3BKLB3B8 list-group-item row"> <h4 class=" list-field type-fullname"><a href="?content=detail&amp;idp=HCH3BKLB000002&amp;event=L_HCH3BKLB3B8">Modele, Mia (GER)</a></h4>
-<div class=" list-field type-field" style="width: 50px"><div class="visible-xs-block visible-sm-block list-label">Bib Number</div>F3166</div> </li>
+<li class=" list-active event-L_HCH3BKLB3B8 list-group-item row"> <div class="row"> <h4 class=" list-field type-fullname"><a href="?content=detail&amp;fpid=search&amp;pid=search&amp;idp=HCH3BKLBZZZZ01&amp;lang=EN_CAP&amp;event=L_HCH3BKLB3B8&amp;search%5Bstart_no%5D=903166&amp;search_event=L_HCH3BKLB3B8">Dr. Example, Ada Lin (SUI)</a></h4> </div>
+<div class=" list-field type-field" style="width: 50px"><div class="visible-xs-block visible-sm-block list-label">Bib Number</div>903166</div> </li>
+<li class=" event-L_HCH3BKLB3B8 list-group-item row"> <h4 class=" list-field type-fullname"><a href="?content=detail&amp;idp=HCH3BKLBZZZZ02&amp;event=L_HCH3BKLB3B8">Modele, Noor (BEL)</a></h4>
+<div class=" list-field type-field" style="width: 50px"><div class="visible-xs-block visible-sm-block list-label">Bib Number</div>F903166</div> </li>
 <li class=" event-S_HCH3BKLB3B9 list-group-item row"> <h4 class=" list-field type-fullname"><a href="?content=detail&amp;idp=HCH3BKLB66AAAA&amp;event=S_HCH3BKLB3B9">Relay, Team</a></h4>
-<div class=" list-field type-field" style="width: 50px"><div class="visible-xs-block visible-sm-block list-label">Bib Number</div>3166</div> </li></ul>`;
-function mikaDetailPage(runner: string, bib: string, official: string | null, year = "2026", idp = "HCH3BKLB000001"): string {
+<div class=" list-field type-field" style="width: 50px"><div class="visible-xs-block visible-sm-block list-label">Bib Number</div>903166</div> </li></ul>`;
+function mikaDetailPage(runner: string, bib: string, official: string | null, year = "2026", idp = "HCH3BKLBZZZZ01"): string {
   return `<meta property="og:url" content="https://frankfurt.r.mikatiming.de/${year}/?content=detail&amp;event=L_HCH3BKLB3B8&amp;event_main_group=${year}&amp;idp=${idp}" />
 <table class="table table-condensed"> <tbody> <tr class=" f-__fullname" > <th class="desc" >Name</th> <td class="f-__fullname last">${runner}</td> </tr>
 <tr class="list-highlight f-start_no_text" > <th class="desc" >Bib Number</th> <td class="f-start_no_text last">${bib}</td> </tr>
 ${official ? `<tr class="list-highlight f-time_finish_netto" > <th class="desc" >Time Total</th> <td class="f-time_finish_netto last">${official}</td> </tr>` : ""}
 <tr class=" f-time_finish_brutto" > <th class="desc" >Finish Time (Gun)</th> <td class="f-time_finish_brutto last">03:29:22</td> </tr> </tbody> </table>`;
 }
-const FRANKFURT = "frankfurt.r.mikatiming.de/2026|L_|3166";
+const FRANKFURT = "frankfurt.r.mikatiming.de/2026|L_|903166";
 
 test("MikaTiming: the search by bib gives the runner's id, the lettered twin and another event's bib left aside", () => {
-  assert.equal(mikaSearchUrl("frankfurt.r.mikatiming.de", "2026", "F3166"), "https://frankfurt.r.mikatiming.de/2026/?pid=search&search%5Bstart_no%5D=F3166");
+  assert.equal(mikaSearchUrl("frankfurt.r.mikatiming.de", "2026", "F903166"), "https://frankfurt.r.mikatiming.de/2026/?pid=search&search%5Bstart_no%5D=F903166");
   const rows = mikaRowsOf(MIKA_SEARCH);
   assert.deepEqual(rows, [
-    { code: "L_HCH3BKLB3B8", bib: "3166", idp: "HCH3BKLB000001" },
-    { code: "L_HCH3BKLB3B8", bib: "F3166", idp: "HCH3BKLB000002" },
-    { code: "S_HCH3BKLB3B9", bib: "3166", idp: "HCH3BKLB66AAAA" },
+    { code: "L_HCH3BKLB3B8", bib: "903166", idp: "HCH3BKLBZZZZ01" },
+    { code: "L_HCH3BKLB3B8", bib: "F903166", idp: "HCH3BKLBZZZZ02" },
+    { code: "S_HCH3BKLB3B9", bib: "903166", idp: "HCH3BKLB66AAAA" },
   ]);
-  assert.equal(mikaRunnerIdOf(rows, "L_", "3166"), "HCH3BKLB000001");
-  assert.equal(mikaRunnerIdOf(rows, "L_", "F3166"), "HCH3BKLB000002", "the women's bib is its own runner");
+  assert.equal(mikaRunnerIdOf(rows, "L_", "903166"), "HCH3BKLBZZZZ01");
+  assert.equal(mikaRunnerIdOf(rows, "L_", "F903166"), "HCH3BKLBZZZZ02", "the women's bib is its own runner");
   assert.equal(mikaRunnerIdOf(rows, "L_", "316"), undefined, "a bib is exact, never a prefix");
   assert.ok(mikaEventMatches("MAR_9TGG96381A5", "MAR_") && mikaEventMatches("R", "R") && !mikaEventMatches("RW", "R") && !mikaEventMatches("S_X", "L_"));
-  assert.equal(mikaDetailAccount("frankfurt.r.mikatiming.de", "2026", "HCH3BKLB000001", "3166"), "frankfurt.r.mikatiming.de/2026|HCH3BKLB000001|3166");
+  assert.equal(mikaDetailAccount("frankfurt.r.mikatiming.de", "2026", "HCH3BKLBZZZZ01", "903166"), "frankfurt.r.mikatiming.de/2026|HCH3BKLBZZZZ01|903166");
 });
 
 test("MikaTiming: the runner's page is read by four patterns, and its name is brought to what a funder writes", () => {
-  const values = mikaValuesOf(mikaDetailPage("Dr. Example, Lars Ove (NOR)", "3166", "03:21:04"));
-  assert.deepEqual(values, { runner: "Dr. Example, Lars Ove (NOR)", bib: "3166", official: "03:21:04", year: "2026", idp: "HCH3BKLB000001" });
-  assert.equal(mikaRunnerName("Dr. Example, Lars Ove (NOR)"), "Example Lars Ove");
-  assert.equal(mikaRunnerName("Exemple, Selam"), "Exemple Selam");
-  assert.ok(sameRunner(mikaRunnerName("Dr. Example, Lars Ove (NOR)"), "Lars Ove Example"), "the name the funder writes, in its own order");
-  const account = "frankfurt.r.mikatiming.de/2026|HCH3BKLB000001|3166";
-  assert.ok(MIKA_TIMING_RUNNER.accepts(account) && !MIKA_TIMING_RUNNER.accepts("evil.example/2026|HCH3BKLB000001|3166") && !MIKA_TIMING_RUNNER.accepts(FRANKFURT));
-  assert.equal(MIKA_TIMING_RUNNER.url(account), "https://frankfurt.r.mikatiming.de/2026/?content=detail&idp=HCH3BKLB000001");
-  assert.deepEqual(mikaAccountOf(FRANKFURT), { host: "frankfurt.r.mikatiming.de", year: "2026", heat: "L_", bib: "3166" });
-  assert.equal(mikaAccountOf("evil.example/2026|L_|3166"), undefined, "no host but the sites listed");
+  const values = mikaValuesOf(mikaDetailPage("Dr. Example, Ada Lin (SUI)", "903166", "03:38:26"));
+  assert.deepEqual(values, { runner: "Dr. Example, Ada Lin (SUI)", bib: "903166", official: "03:38:26", year: "2026", idp: "HCH3BKLBZZZZ01" });
+  assert.equal(mikaRunnerName("Dr. Example, Ada Lin (SUI)"), "Example Ada Lin");
+  assert.equal(mikaRunnerName("Exemple, Mona (FRA)"), "Exemple Mona");
+  assert.ok(sameRunner(mikaRunnerName("Dr. Example, Ada Lin (SUI)"), "Ada Lin Example"), "the name the funder writes, in its own order");
+  const account = "frankfurt.r.mikatiming.de/2026|HCH3BKLBZZZZ01|903166";
+  assert.ok(MIKA_TIMING_RUNNER.accepts(account) && !MIKA_TIMING_RUNNER.accepts("evil.example/2026|HCH3BKLBZZZZ01|903166") && !MIKA_TIMING_RUNNER.accepts(FRANKFURT));
+  assert.equal(MIKA_TIMING_RUNNER.url(account), "https://frankfurt.r.mikatiming.de/2026/?content=detail&idp=HCH3BKLBZZZZ01");
+  assert.deepEqual(mikaAccountOf(FRANKFURT), { host: "frankfurt.r.mikatiming.de", year: "2026", heat: "L_", bib: "903166" });
+  assert.equal(mikaAccountOf("evil.example/2026|L_|903166"), undefined, "no host but the sites listed");
 });
 
 test("MikaTiming: a plain read finds the runner then reads their page; the year, the bib and the finish are checked", async () => {
   const pages = (detail: string) => async (url: string) => new Response(url.includes("pid=search") ? MIKA_SEARCH : detail, { status: 200 });
-  const read = await readMarathonResult(FRANKFURT, pages(mikaDetailPage("Dr. Example, Lars Ove (NOR)", "3166", "03:21:04")));
-  assert.equal(read.runner, "Example Lars Ove");
-  assert.equal(read.finishSeconds, 3 * 3600 + 21 * 60 + 4);
-  assert.equal(read.subject, marathonSubject("Lars Ove Example", "frankfurt-2026/marathon"));
-  assert.equal(await mikaRunnerAccount(FRANKFURT, pages("")), "frankfurt.r.mikatiming.de/2026|HCH3BKLB000001|3166");
+  const read = await readMarathonResult(FRANKFURT, pages(mikaDetailPage("Dr. Example, Ada Lin (SUI)", "903166", "03:38:26")));
+  assert.equal(read.runner, "Example Ada Lin");
+  assert.equal(read.finishSeconds, 3 * 3600 + 38 * 60 + 26);
+  assert.equal(read.subject, marathonSubject("Ada Lin Example", "frankfurt-2026/marathon"));
+  assert.equal(await mikaRunnerAccount(FRANKFURT, pages("")), "frankfurt.r.mikatiming.de/2026|HCH3BKLBZZZZ01|903166");
   await assert.rejects(readMarathonResult("frankfurt.r.mikatiming.de/2026|L_|9999", pages("")), refused("NO_RESULT"));
-  await assert.rejects(readMarathonResult(FRANKFURT, pages(mikaDetailPage("Dr. Example, Lars Ove (NOR)", "3166", "03:21:04", "2025"))), refused("NO_RESULT"), "a site still answering last year's pages");
-  await assert.rejects(readMarathonResult(FRANKFURT, pages(mikaDetailPage("Dr. Example, Lars Ove (NOR)", "3166", null))), refused("NOT_FINISHED"));
-  await assert.rejects(readMarathonResult(FRANKFURT, pages(mikaDetailPage("Someone, Else", "F3166", "03:21:04"))), refused("ANOTHER_BIB"));
-  await assert.rejects(readMarathonResult("frankfurt.r.mikatiming.de/2031|L_|3166", pages("")), refused("UNKNOWN_RACE"));
+  await assert.rejects(readMarathonResult(FRANKFURT, pages(mikaDetailPage("Dr. Example, Ada Lin (SUI)", "903166", "03:38:26", "2025"))), refused("NO_RESULT"), "a site still answering last year's pages");
+  await assert.rejects(readMarathonResult(FRANKFURT, pages(mikaDetailPage("Dr. Example, Ada Lin (SUI)", "903166", null))), refused("NOT_FINISHED"));
+  await assert.rejects(readMarathonResult(FRANKFURT, pages(mikaDetailPage("Someone, Else", "F903166", "03:38:26"))), refused("ANOTHER_BIB"));
+  await assert.rejects(readMarathonResult("frankfurt.r.mikatiming.de/2031|L_|903166", pages("")), refused("UNKNOWN_RACE"));
 });
 
 /**
  * The site of a race just run, as Chicago's answered on 12 Oct 2026, the day after the race, under "Unofficial Race
  * Results": no event in a row's class, the heat without its mark in the row's link, and no event in the page's own
  * address. Every reading of that race answered "No runner answers to that bib". The pages below are those, trimmed to
- * what is read, with a name nobody bears.
+ * what is read, with an invented runner: the name, the time, the site's own id, and a bib no race gives.
  */
 const MIKA_SEARCH_JUST_RUN = `<ul class="list-group list-group-multicolumn"><li class=" list-group row list-group-item list-group-header "><div>Place</div></li>
-<li class=" list-active list-group-item row"> <div class="row"> <h4 class=" list-field type-fullname"><a href="?content=detail&amp;fpid=search&amp;pid=search&amp;idp=2EFG9638000041&amp;lang=EN_CAP&amp;event=MAR&amp;search%5Bstart_no%5D=41&amp;search_event=">Exemple, Selam (ETH)</a></h4> </div>
-<div class=" list-field type-field" style="width: 45px"><div class="visible-xs-block visible-sm-block list-label">BIB</div>41</div> </li></ul>`;
-function mikaDetailPageJustRun(runner: string, bib: string, official: string, year = "2026", idp = "2EFG9638000041"): string {
+<li class=" list-active list-group-item row"> <div class="row"> <h4 class=" list-field type-fullname"><a href="?content=detail&amp;fpid=search&amp;pid=search&amp;idp=2EFG9638ZZZZ41&amp;lang=EN_CAP&amp;event=MAR&amp;search%5Bstart_no%5D=900041&amp;search_event=">Exemple, Mona</a></h4> </div>
+<div class=" list-field type-field" style="width: 45px"><div class="visible-xs-block visible-sm-block list-label">BIB</div>900041</div> </li></ul>`;
+function mikaDetailPageJustRun(runner: string, bib: string, official: string, year = "2026", idp = "2EFG9638ZZZZ41"): string {
   return `<meta property="og:url" content="https://results.chicagomarathon.com/${year}/?content=detail&amp;idp=${idp}" />
 <table class="table table-condensed"> <tbody> <tr class=" f-__fullname" > <th class="desc" >Name</th> <td class="f-__fullname last">${runner}</td> </tr>
 <tr class="list-highlight f-start_no_text" > <th class="desc" >Bib Number</th> <td class="f-start_no_text last">${bib}</td> </tr>
 <tr class="list-highlight f-time_finish_netto" > <th class="desc" >Time Total</th> <td class="f-time_finish_netto last">${official}</td> </tr> </tbody> </table>`;
 }
-const CHICAGO = "results.chicagomarathon.com/2026|MAR_|41";
+const CHICAGO = "results.chicagomarathon.com/2026|MAR_|900041";
 
 test("MikaTiming: the site of a race just run is read too, its event in the row's link and none in the page's own address", async () => {
   const rows = mikaRowsOf(MIKA_SEARCH_JUST_RUN);
-  assert.deepEqual(rows, [{ code: "MAR", bib: "41", idp: "2EFG9638000041" }]);
-  assert.equal(mikaRunnerIdOf(rows, "MAR_", "41"), "2EFG9638000041");
+  assert.deepEqual(rows, [{ code: "MAR", bib: "900041", idp: "2EFG9638ZZZZ41" }]);
+  assert.equal(mikaRunnerIdOf(rows, "MAR_", "900041"), "2EFG9638ZZZZ41");
   // The heat without its mark is the heat; nothing shorter, nothing longer, and never another heat's.
   assert.ok(mikaEventMatches("MAR", "MAR_") && mikaEventMatches("L", "L_") && !mikaEventMatches("MA", "MAR_") && !mikaEventMatches("MARX", "MAR_") && !mikaEventMatches("S", "L_"));
   // Where the class carries the event it is still the one read: a row of a year before is read as it was.
@@ -433,20 +433,20 @@ test("MikaTiming: the site of a race just run is read too, its event in the row'
   // `search_event=` is the search's own field, never the row's event: a row with no other is no row.
   assert.deepEqual(mikaRowsOf(MIKA_SEARCH_JUST_RUN.replace("&amp;event=MAR", "")), []);
 
-  const detail = mikaDetailPageJustRun("Exemple, Selam (ETH)", "41", "02:21:04");
-  assert.deepEqual(mikaValuesOf(detail), { runner: "Exemple, Selam (ETH)", bib: "41", official: "02:21:04", year: "2026", idp: "2EFG9638000041" });
+  const detail = mikaDetailPageJustRun("Exemple, Mona", "900041", "02:52:40");
+  assert.deepEqual(mikaValuesOf(detail), { runner: "Exemple, Mona", bib: "900041", official: "02:52:40", year: "2026", idp: "2EFG9638ZZZZ41" });
   const pages = (page: string) => async (url: string) => new Response(url.includes("pid=search") ? MIKA_SEARCH_JUST_RUN : page, { status: 200 });
   const read = await readMarathonResult(CHICAGO, pages(detail));
-  assert.equal(read.runner, "Exemple Selam");
-  assert.equal(read.finishSeconds, 2 * 3600 + 21 * 60 + 4);
-  assert.equal(await mikaRunnerAccount(CHICAGO, pages("")), "results.chicagomarathon.com/2026|2EFG9638000041|41");
+  assert.equal(read.runner, "Exemple Mona");
+  assert.equal(read.finishSeconds, 2 * 3600 + 52 * 60 + 40);
+  assert.equal(await mikaRunnerAccount(CHICAGO, pages("")), "results.chicagomarathon.com/2026|2EFG9638ZZZZ41|900041");
   // The page's year is still the race's: a site answering last year's pages, in either shape, has no result yet.
-  await assert.rejects(readMarathonResult(CHICAGO, pages(mikaDetailPageJustRun("Exemple, Selam (ETH)", "41", "02:21:04", "2025"))), refused("NO_RESULT"));
-  await assert.rejects(readMarathonResult(CHICAGO, pages(mikaDetailPageJustRun("Someone, Else", "42", "02:21:04"))), refused("ANOTHER_BIB"));
+  await assert.rejects(readMarathonResult(CHICAGO, pages(mikaDetailPageJustRun("Exemple, Mona", "900041", "02:52:40", "2025"))), refused("NO_RESULT"));
+  await assert.rejects(readMarathonResult(CHICAGO, pages(mikaDetailPageJustRun("Someone, Else", "900042", "02:52:40"))), refused("ANOTHER_BIB"));
   // One pattern reads both addresses, and it still asks for the year and the id.
   const address = MIKA_TIMING_RUNNER.matches[3].value;
   assert.ok(address.includes("(?:event=[A-Za-z0-9_]+&amp;)?") && address.includes("(?<year>20\\d\\d)") && address.includes("idp=(?<idp>[A-Z0-9]+)"));
-  assert.match(mikaDetailPage("Dr. Example, Lars Ove (NOR)", "3166", "03:21:04"), new RegExp(address), "and the address of a year before");
+  assert.match(mikaDetailPage("Dr. Example, Ada Lin (SUI)", "903166", "03:38:26"), new RegExp(address), "and the address of a year before");
 });
 
 test("MikaTiming: its own goal and provider, one line for both timing companies, and nothing offered until goal 31 is signed", (t) => {
@@ -553,12 +553,13 @@ test("a cube competition asks its event under itself too, and a competition in s
 /**
  * race result, the third timing platform (the founder, 27 Sep 2026: coverage first), measured on the 42K de Buenos
  * Aires 2026 on 26 Sep 2026: the list's own key order, one row per bib in search mode, an empty time for a DNF.
+ * The rows below are invented whole: names, nation, category, times, and bibs no race gives.
  */
 const RR_CONFIG = JSON.stringify({ key: "bafa4cbc7e8acfb6a08aa821a73310c1", server: "my4.raceresult.com", eventname: "42K de Buenos Aires 2026", contests: { "1": "Maratón", "2": "DIS Maratón" }, TabConfig: { Lists: [{ Name: "Maratón 2026|Resultado General G/CH", Contest: "1" }] } });
 const RR_FIELDS = ["BIB", "ID", "ConEstatus([ClasifGeneral.p])", "correctSpelling([FLNAME])", "NATION.FLAG", "AGEGROUP.NAMESHORT", "SexoMF", "[Final.CHIP]", "[Final.GUN]", "[Final]"];
 const rrList = (rows: string[][], fields = RR_FIELDS) => JSON.stringify({ list: { ListName: "Maratón 2026|Resultado General G/CH" }, data: [...rows, [14259]], DataFields: fields });
-const RR_ROW = ["1", "1", "1.", "Tobias Kibet Example", "[img:/graphics/flags/KE.svg]", "M35-39", "M", "2:08:24", "2:08:28", "2:08:28"];
-const RR_DNF = ["13", "13", "DNF", "Zacharia Example", "[img:/graphics/flags/KE.svg]", "M18-29", "M", "", "", ""];
+const RR_ROW = ["900001", "900001", "412.", "Ada Maria Example", "[img:/graphics/flags/AR.svg]", "F40-44", "F", "2:58:41", "2:59:03", "2:59:03"];
+const RR_DNF = ["900013", "900013", "DNF", "Noor Example", "[img:/graphics/flags/AR.svg]", "F30-34", "F", "", "", ""];
 const rrFetch = (answers: Record<string, string>) => async (url: string) => {
   if (url.includes("/results/config")) return new Response(RR_CONFIG, { status: 200 });
   const term = /term=([^&]*)/.exec(url)?.[1] ?? "";
@@ -567,17 +568,17 @@ const rrFetch = (answers: Record<string, string>) => async (url: string) => {
 const BUENOS_AIRES = marathonEventById("buenos-aires-2026/marathon")!;
 
 test("race result: the account carries what the URL needs, and the pattern takes the bib's own row at the register's columns", async () => {
-  const account = raceResultAccount({ key: "bafa4cbc7e8acfb6a08aa821a73310c1", server: "my4.raceresult.com" }, BUENOS_AIRES.race, BUENOS_AIRES.event, " 1 ");
-  assert.equal(account, "my4.raceresult.com|423560|bafa4cbc7e8acfb6a08aa821a73310c1|Marat%C3%B3n%202026%7CResultado%20General%20G%2FCH|1|1|3|7");
+  const account = raceResultAccount({ key: "bafa4cbc7e8acfb6a08aa821a73310c1", server: "my4.raceresult.com" }, BUENOS_AIRES.race, BUENOS_AIRES.event, " 900001 ");
+  assert.equal(account, "my4.raceresult.com|423560|bafa4cbc7e8acfb6a08aa821a73310c1|Marat%C3%B3n%202026%7CResultado%20General%20G%2FCH|1|900001|3|7");
   assert.ok(RACE_RESULT_ROW.accepts(account) && !RACE_RESULT_ROW.accepts("evil.example|423560|bafa4cbc7e8acfb6a08aa821a73310c1|x|1|1|3|7"));
-  assert.equal(RACE_RESULT_ROW.url(account), "https://my4.raceresult.com/423560/results/list?key=bafa4cbc7e8acfb6a08aa821a73310c1&listname=Marat%C3%B3n%202026%7CResultado%20General%20G%2FCH&page=results&contest=1&r=search&l=0&openedGroups=%7B%7D&term=1");
+  assert.equal(RACE_RESULT_ROW.url(account), "https://my4.raceresult.com/423560/results/list?key=bafa4cbc7e8acfb6a08aa821a73310c1&listname=Marat%C3%B3n%202026%7CResultado%20General%20G%2FCH&page=results&contest=1&r=search&l=0&openedGroups=%7B%7D&term=900001");
   const [pattern] = matchesOf(RACE_RESULT_ROW, account);
-  assert.deepEqual({ ...new RegExp(pattern.value).exec(rrList([RR_ROW]))?.groups }, { runner: "Tobias Kibet Example", official: "2:08:24" });
-  assert.equal(new RegExp(pattern.value).exec(rrList([["4", "4", "2.", "John Example", "", "M30-34", "M", "2:08:36", "2:08:39", "2:08:39"]])), null, "another bib's row");
-  assert.deepEqual({ ...new RegExp(pattern.value).exec(rrList([RR_DNF.map((cell, index) => (index === 0 ? "1" : cell))]))?.groups }, { runner: "Zacharia Example", official: "" }, "a DNF is an empty time, read as such");
+  assert.deepEqual({ ...new RegExp(pattern.value).exec(rrList([RR_ROW]))?.groups }, { runner: "Ada Maria Example", official: "2:58:41" });
+  assert.equal(new RegExp(pattern.value).exec(rrList([["900004", "900004", "413.", "Sam Example", "", "M45-49", "M", "3:01:10", "3:01:22", "3:01:22"]])), null, "another bib's row");
+  assert.deepEqual({ ...new RegExp(pattern.value).exec(rrList([RR_DNF.map((cell, index) => (index === 0 ? "900001" : cell))]))?.groups }, { runner: "Noor Example", official: "" }, "a DNF is an empty time, read as such");
   assert.deepEqual(raceResultRows(JSON.parse(rrList([RR_ROW, RR_DNF])).data), [RR_ROW, RR_DNF], "the trailing count is not a row");
   assert.deepEqual(raceResultRows({ "#1_f": [RR_ROW], "#2_m": { sub: [RR_DNF] } }), [RR_ROW, RR_DNF], "groups are flattened");
-  assert.equal(raceResultSeconds("2:08:24"), 7_704);
+  assert.equal(raceResultSeconds("2:58:41"), 10_721);
   assert.equal(raceResultSeconds("12:29.14"), 749, "minutes, seconds and hundredths");
   assert.equal(raceResultSeconds("1:05:32.5"), 3_932);
   assert.equal(raceResultSeconds(""), undefined);
@@ -589,11 +590,11 @@ test("race result: the account carries what the URL needs, and the pattern takes
 });
 
 test("race result: the row is read plainly by bib, the list's columns are checked first, and the register's races are read through the marathon door", async () => {
-  const found = await readRaceResultRow(BUENOS_AIRES.race, BUENOS_AIRES.event, "1", rrFetch({ "1": rrList([RR_ROW]) }));
-  assert.deepEqual(found.row, { runner: "Tobias Kibet Example", official: "2:08:24" });
+  const found = await readRaceResultRow(BUENOS_AIRES.race, BUENOS_AIRES.event, "900001", rrFetch({ "900001": rrList([RR_ROW]) }));
+  assert.deepEqual(found.row, { runner: "Ada Maria Example", official: "2:58:41" });
   await assert.rejects(readRaceResultRow(BUENOS_AIRES.race, BUENOS_AIRES.event, "999", rrFetch({})), (error: unknown) => error instanceof RaceResultError && error.code === "NO_RESULT");
   const gone = [...RR_FIELDS]; gone[7] = "[Final.GUN]";
-  await assert.rejects(readRaceResultRow(BUENOS_AIRES.race, BUENOS_AIRES.event, "1", rrFetch({ "1": rrList([RR_ROW], gone) })), (error: unknown) => error instanceof RaceResultError && error.code === "UNKNOWN_LIST", "a list that no longer publishes the time the register reads is not trusted");
+  await assert.rejects(readRaceResultRow(BUENOS_AIRES.race, BUENOS_AIRES.event, "900001", rrFetch({ "900001": rrList([RR_ROW], gone) })), (error: unknown) => error instanceof RaceResultError && error.code === "UNKNOWN_LIST", "a list that no longer publishes the time the register reads is not trusted");
   // The columns moved, and both fields are still published (the audit of 1 Oct 2026: measured on a race the day after
   // it was registered). They are found by their names, the row is read at its new places, and the account the
   // attested read takes carries those places, so its pattern reads the same cells.
@@ -601,19 +602,19 @@ test("race result: the row is read plainly by bib, the list's columns are checke
   const shiftedRow = [...RR_ROW.slice(0, 3), "Some Club", ...RR_ROW.slice(3)];
   assert.deepEqual(raceResultColumns(shifted, BUENOS_AIRES.race.raceResult!), { name: 4, time: 8 });
   assert.deepEqual(raceResultColumns(RR_FIELDS, BUENOS_AIRES.race.raceResult!), { name: 3, time: 7 }, "where the register wrote them, when nothing moved");
-  const again = await readRaceResultRow(BUENOS_AIRES.race, BUENOS_AIRES.event, "1", rrFetch({ "1": rrList([shiftedRow], shifted) }));
-  assert.deepEqual(again.row, { runner: "Tobias Kibet Example", official: "2:08:24" });
-  assert.match(again.account, /\|1\|1\|4\|8$/);
+  const again = await readRaceResultRow(BUENOS_AIRES.race, BUENOS_AIRES.event, "900001", rrFetch({ "900001": rrList([shiftedRow], shifted) }));
+  assert.deepEqual(again.row, { runner: "Ada Maria Example", official: "2:58:41" });
+  assert.match(again.account, /\|1\|900001\|4\|8$/);
   assert.ok(RACE_RESULT_ROW.accepts(again.account));
-  assert.deepEqual({ ...new RegExp(matchesOf(RACE_RESULT_ROW, again.account)[0].value).exec(rrList([shiftedRow], shifted))?.groups }, { runner: "Tobias Kibet Example", official: "2:08:24" }, "the attested pattern reads the moved cells");
+  assert.deepEqual({ ...new RegExp(matchesOf(RACE_RESULT_ROW, again.account)[0].value).exec(rrList([shiftedRow], shifted))?.groups }, { runner: "Ada Maria Example", official: "2:58:41" }, "the attested pattern reads the moved cells");
   // What the pattern cannot reach is refused rather than read wrong: the bib not first, or the time before the name.
   assert.equal(raceResultColumns(["ID", ...RR_FIELDS], BUENOS_AIRES.race.raceResult!), undefined);
   assert.equal(raceResultColumns(["BIB", "[Final.CHIP]", "correctSpelling([FLNAME])"], BUENOS_AIRES.race.raceResult!), undefined);
-  const read = await readMarathonResult("423560|1|1", rrFetch({ "1": rrList([RR_ROW]) }));
-  assert.equal(read.finishSeconds, 7_704);
+  const read = await readMarathonResult("423560|1|900001", rrFetch({ "900001": rrList([RR_ROW]) }));
+  assert.equal(read.finishSeconds, 10_721);
   assert.equal(read.race.timer, "race-result");
-  assert.equal(read.subject, marathonSubject("Tobias Kibet Example", "buenos-aires-2026/marathon"));
-  await assert.rejects(readMarathonResult("423560|1|13", rrFetch({ "13": rrList([RR_DNF]) })), refused("NOT_FINISHED"));
+  assert.equal(read.subject, marathonSubject("Ada Maria Example", "buenos-aires-2026/marathon"));
+  await assert.rejects(readMarathonResult("423560|1|900013", rrFetch({ "900013": rrList([RR_DNF]) })), refused("NOT_FINISHED"));
   await assert.rejects(readMarathonResult("999999|1|1", rrFetch({})), refused("UNKNOWN_RACE"));
   assert.equal(marathonGoalTypeOf("race-result"), 34);
   assert.equal(marathonProviderIdOf("race-result"), "0x7cfa6c530b178b3d1b56fe7e1e080bc8cdce8cf60bae36dace0378c2cb4f2887");

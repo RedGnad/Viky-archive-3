@@ -30,7 +30,7 @@ export type MarathonResult = Readonly<{
   race: MarathonRace;
   event: MarathonEvent;
   bib: string;
-  /** The runner as the page prints them, "MODELE Ibou". */
+  /** The runner as the page prints them, "MODELE Sam". */
   runner: string;
   /** The official time in seconds, and as the page prints it. */
   finishSeconds: number;

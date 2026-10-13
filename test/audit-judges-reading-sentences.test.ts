@@ -72,26 +72,26 @@ function recorder(answer: (url: string) => Response) {
 
 const RR_CONFIG = JSON.stringify({ key: "bafa4cbc7e8acfb6a08aa821a73310c1", server: "my4.raceresult.com", eventname: "42K de Buenos Aires 2026", contests: { "1": "Maratón" }, TabConfig: { Lists: [{ Name: "Maratón 2026|Resultado General G/CH", Contest: "1" }] } });
 const RR_FIELDS = ["BIB", "ID", "ConEstatus([ClasifGeneral.p])", "correctSpelling([FLNAME])", "NATION.FLAG", "AGEGROUP.NAMESHORT", "SexoMF", "[Final.CHIP]", "[Final.GUN]", "[Final]"];
-const RR_ROW = ["1", "1", "1.", "Tobias Kibet Example", "[img:/graphics/flags/KE.svg]", "M35-39", "M", "2:08:24", "2:08:28", "2:08:28"];
+const RR_ROW = ["900001", "900001", "412.", "Ada Maria Example", "[img:/graphics/flags/AR.svg]", "F40-44", "F", "2:58:41", "2:59:03", "2:59:03"];
 const raceResult = (url: string) => new Response(url.includes("/results/config") ? RR_CONFIG : JSON.stringify({ data: [RR_ROW, [1]], DataFields: RR_FIELDS }), { status: 200 });
 
-const MIKA_SEARCH = `<li class=" list-active event-L_HCH3BKLB3B8 list-group-item row"> <div class="row"> <h4 class=" list-field type-fullname"><a href="?content=detail&amp;fpid=search&amp;pid=search&amp;idp=HCH3BKLB000001&amp;lang=EN_CAP&amp;event=L_HCH3BKLB3B8&amp;search%5Bstart_no%5D=3166&amp;search_event=L_HCH3BKLB3B8">Dr. Example, Lars Ove (NOR)</a></h4> </div>
-<div class=" list-field type-field" style="width: 50px"><div class="visible-xs-block visible-sm-block list-label">Bib Number</div>3166</div> </li>`;
-const MIKA_DETAIL = `<meta property="og:url" content="https://frankfurt.r.mikatiming.de/2026/?content=detail&amp;event=L_HCH3BKLB3B8&amp;event_main_group=2026&amp;idp=HCH3BKLB000001" />
-<table class="table table-condensed"> <tbody> <tr class=" f-__fullname" > <th class="desc" >Name</th> <td class="f-__fullname last">Dr. Example, Lars Ove (NOR)</td> </tr>
-<tr class="list-highlight f-start_no_text" > <th class="desc" >Bib Number</th> <td class="f-start_no_text last">3166</td> </tr>
-<tr class="list-highlight f-time_finish_netto" > <th class="desc" >Time Total</th> <td class="f-time_finish_netto last">03:21:04</td> </tr> </tbody> </table>`;
+const MIKA_SEARCH = `<li class=" list-active event-L_HCH3BKLB3B8 list-group-item row"> <div class="row"> <h4 class=" list-field type-fullname"><a href="?content=detail&amp;fpid=search&amp;pid=search&amp;idp=HCH3BKLBZZZZ01&amp;lang=EN_CAP&amp;event=L_HCH3BKLB3B8&amp;search%5Bstart_no%5D=903166&amp;search_event=L_HCH3BKLB3B8">Dr. Example, Ada Lin (SUI)</a></h4> </div>
+<div class=" list-field type-field" style="width: 50px"><div class="visible-xs-block visible-sm-block list-label">Bib Number</div>903166</div> </li>`;
+const MIKA_DETAIL = `<meta property="og:url" content="https://frankfurt.r.mikatiming.de/2026/?content=detail&amp;event=L_HCH3BKLB3B8&amp;event_main_group=2026&amp;idp=HCH3BKLBZZZZ01" />
+<table class="table table-condensed"> <tbody> <tr class=" f-__fullname" > <th class="desc" >Name</th> <td class="f-__fullname last">Dr. Example, Ada Lin (SUI)</td> </tr>
+<tr class="list-highlight f-start_no_text" > <th class="desc" >Bib Number</th> <td class="f-start_no_text last">903166</td> </tr>
+<tr class="list-highlight f-time_finish_netto" > <th class="desc" >Time Total</th> <td class="f-time_finish_netto last">03:38:26</td> </tr> </tbody> </table>`;
 const mika = (url: string) => new Response(url.includes("pid=search") ? MIKA_SEARCH : MIKA_DETAIL, { status: 200 });
 
 test("one press of Read my result sends four plain requests to race result and three to MikaTiming from the app, before the reading service", async () => {
   const rr = recorder(raceResult);
-  await readMarathonResult("423560|1|1", rr.fetchImpl);
-  await assert.rejects(attestMarathonResult("423560|1|1", rr.deps, rr.fetchImpl));
+  await readMarathonResult("423560|1|900001", rr.fetchImpl);
+  await assert.rejects(attestMarathonResult("423560|1|900001", rr.deps, rr.fetchImpl));
   assert.deepEqual(rr.calls, ["plain my.raceresult.com", "plain my4.raceresult.com", "plain my.raceresult.com", "plain my4.raceresult.com", "reading service"]);
 
   const mt = recorder(mika);
-  await readMarathonResult("frankfurt.r.mikatiming.de/2026|L_|3166", mt.fetchImpl);
-  await assert.rejects(attestMarathonResult("frankfurt.r.mikatiming.de/2026|L_|3166", mt.deps, mt.fetchImpl));
+  await readMarathonResult("frankfurt.r.mikatiming.de/2026|L_|903166", mt.fetchImpl);
+  await assert.rejects(attestMarathonResult("frankfurt.r.mikatiming.de/2026|L_|903166", mt.deps, mt.fetchImpl));
   assert.deepEqual(mt.calls, ["plain frankfurt.r.mikatiming.de", "plain frankfurt.r.mikatiming.de", "plain frankfurt.r.mikatiming.de", "reading service"]);
 
   // One press is both routes, and both read with the app's own fetch, in the app's own process.
